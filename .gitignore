@@ -1,0 +1,42 @@
+## Ignore Visual Studio temporary files, build results, and
+## user-specific files
+
+# Build Folders (bin, obj)
+**/bin/
+**/obj/
+
+# VS 2019/2022
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider IDE
+.idea/
+
+# Build Results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# dotnet watch
+**/Properties/launchSettings.json
+
+# NUGET
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Others
+*.dbmdl
+*.dbschema
+*.mdf
+*.ldf
+
+# Source Link
+*.sourcelink.json
+

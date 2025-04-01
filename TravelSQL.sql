@@ -40,3 +40,5 @@ CREATE TABLE ApplicationUser (
     PhoneNumber NVARCHAR(20),
     IsAdmin BIT DEFAULT 0
 );
+
+SELECT * FROM sys.tables;
