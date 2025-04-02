@@ -21,8 +21,11 @@ namespace Travel.API.Data
             : base(options)
         {
         }
-        
+
+        // *****************************************************************
         public DbSet<Trip> Trips { get; set; }
+
+        public DbSet<Destination> Destinations { get; set; }
 
         // Makes sure EF Core uses the actual table name "Trip" and not "Trips"
         // "Trips" is used in the code for better meaning, plurar
@@ -31,10 +34,10 @@ namespace Travel.API.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Trip>().ToTable("Trip");
+
+            modelBuilder.Entity<Destination>().ToTable("Destination");
+
         }
 
-
-
-        // Add other DbSets later
     }
 }
