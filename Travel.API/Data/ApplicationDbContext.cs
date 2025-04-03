@@ -26,6 +26,10 @@ namespace Travel.API.Data
         public DbSet<Trip> Trips { get; set; }
 
         public DbSet<Destination> Destinations { get; set; }
+        public DbSet<Guide> Guides { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         // Makes sure EF Core uses the actual table name "Trip" and not "Trips"
         // "Trips" is used in the code for better meaning, plurar
@@ -36,6 +40,37 @@ namespace Travel.API.Data
             modelBuilder.Entity<Trip>().ToTable("Trip");
 
             modelBuilder.Entity<Destination>().ToTable("Destination");
+
+            modelBuilder.Entity<Guide>().ToTable("Guide");
+
+            // bridge table between Trip and Guide
+            /*
+             * This tells EF Core: “I already have a bridge table called TripGuide with columns TripId and GuideId, and it’s the join between Trip and Guide.”
+             */
+            modelBuilder.Entity<Trip>()
+                .HasMany(t => t.Guides)
+                .WithMany(g => g.Trips)
+                .UsingEntity<Dictionary<string, object>>(
+                    "TripGuide",
+                    j => j
+                        .HasOne<Guide>()
+                        .WithMany()
+                        .HasForeignKey("GuideId"),
+                    j => j
+                        .HasOne<Trip>()
+                        .WithMany()
+                        .HasForeignKey("TripId"),
+                    j =>
+                    {
+                        j.HasKey("TripId", "GuideId");
+                        j.ToTable("TripGuide"); // exactly matches your SQL table
+                    });
+
+            modelBuilder.Entity<ApplicationUser>().ToTable("ApplicationUser");
+
+            modelBuilder.Entity<Wishlist>().ToTable("Wishlist");
+
+            modelBuilder.Entity<Log>().ToTable("Log");
 
         }
 

@@ -1,3 +1,5 @@
+CREATE database Travel;
+
 CREATE TABLE Destination (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
@@ -29,6 +31,21 @@ CREATE TABLE TripGuide (
     PRIMARY KEY (TripId, GuideId)
 );
 
+CREATE TABLE Wishlist (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT FOREIGN KEY REFERENCES ApplicationUser(Id),
+    TripId INT FOREIGN KEY REFERENCES Trip(Id)
+);
+
+
+CREATE TABLE Log (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT FOREIGN KEY REFERENCES ApplicationUser(Id),
+    Action NVARCHAR(100),
+    Entity NVARCHAR(100),
+    EntityId INT,
+    Timestamp DATETIME DEFAULT GETDATE()
+);
 
 CREATE TABLE ApplicationUser (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -42,3 +59,8 @@ CREATE TABLE ApplicationUser (
 );
 
 SELECT * FROM sys.tables;
+
+USE Travel;
+CREATE USER [DESKTOP-69AGKI8\Dario] FOR LOGIN [DESKTOP-69AGKI8\Dario];
+ALTER ROLE db_owner ADD MEMBER [DESKTOP-69AGKI8\Dario];
+USE master
