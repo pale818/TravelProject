@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Models;
 
 namespace Travel.API.Controllers
 {
-    [Route("api/[controller]")]
+    // secure authorization, use JWT
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class ApplicationUserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

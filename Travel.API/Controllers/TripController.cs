@@ -3,6 +3,7 @@
  */
 
 // Gives access to MVC features, especially [ApiController], ControllerBase, and ActionResult.
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // Required for ToListAsync() and other EF Core async database methods.
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ using Travel.API.Models;
 
 namespace Travel.API.Controllers
 {
+    // authorize with JWT
+    [Authorize]
     [ApiController] // Tells ASP.NET Core this is a Web API controller, not an MVC one.
 
     /*
@@ -28,6 +31,7 @@ namespace Travel.API.Controllers
         {
             _context = context;
         }
+
 
         // **********************************************************
         // GET: api/trip
