@@ -58,6 +58,13 @@ CREATE TABLE ApplicationUser (
     IsAdmin BIT DEFAULT 0
 );
 
+
+-- checking jtw token and user
+SELECT * FROM ApplicationUser;
+SELECT * FROM ApplicationUser WHERE UserName = 'john';
+DELETE FROM ApplicationUser WHERE UserName = 'john';
+
+
 SELECT * FROM sys.tables;
 
 USE Travel;
