@@ -19,6 +19,10 @@ namespace Travel.API.Controllers
             _context = context;
         }
 
+        /*
+         * Use **ActionResult<T>** when you're returning an object, and you still want to have flexibility to return error responses 
+         * (NotFound, BadRequest, etc.)
+         */
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetUsers()
         {

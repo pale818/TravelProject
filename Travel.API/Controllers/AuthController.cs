@@ -20,6 +20,27 @@ namespace Travel.API.Controllers
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
+        /*
+         * Use **IActionResult** when you just return status codes or small info, not a data model
+         * 
+         * Why use a DTO (RegisterRequest) instead of the entity?
+            Very important:
+
+            Direct ApplicationUser	DTO (RegisterRequest)
+            Risky: exposes all fields of the model	Safe: only the fields you want from the client
+            Tightly coupled to DB schema	Decoupled, flexible
+            Could accidentally allow bad fields (e.g., Id, CreatedAt, Token)	You control exactly what comes in
+            That's why DTOs (Data Transfer Objects) are the modern, safe way to handle request/response data.
+
+            Aspect	            PostUser(ApplicationUser user)          Register([FromBody] RegisterRequest request)
+            Return type	        ActionResult<ApplicationUser>	        IActionResult
+            Return value	    Sends back created user	                Sends status, maybe token
+            Input type	        Entity (ApplicationUser)	            DTO (RegisterRequest)
+            [FromBody] needed?	Optional	                            Recommended
+            Use case	        CRUD (EF-based scaffolding)	            Custom logic (auth, validation)
+            Secure/flexible     Risky if exposed directly	            Best practice
+
+         */
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
