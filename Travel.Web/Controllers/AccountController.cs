@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
+
+
 namespace Travel.Web.Controllers
 {
     public class AccountController : Controller
@@ -50,13 +52,31 @@ namespace Travel.Web.Controllers
                 var result = await response.Content.ReadFromJsonAsync<JwtResponse>();
                 if (result != null)
                 {
+
                     HttpContext.Session.SetString("JWToken", result.Token);
-                    return RedirectToAction("Index", "Home");
+                    TempData["SuccessMessage"] = "Successful log in.";
+
+                    // this is .Net redirection function meaning: "Dashboard" is razor page (cshtml) and "Home" is folder where
+                    // Dashboard.cshtml is located
+                    // SO IF BACKEND CONFIRMS USER'S CREDENTIOALS (Usernam + password) IT RETURNS 200 OK
+                    // JWT token also and code comes here where Home/Dashboard,cshtml is loaded
+                    return RedirectToAction("Dashboard", "Home");
                 }
             }
 
-            ModelState.AddModelError("", "Login failed.");
+
+            TempData["ErrorMessage"] = "Login failed. Invalid username or password.";
             return View(model);
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear(); // remove all session data, including JWToken
+            return RedirectToAction("Login", "Account");
         }
 
     }

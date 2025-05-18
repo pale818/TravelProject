@@ -20,7 +20,7 @@ namespace Travel.API.Helpers
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("userId", user.Id.ToString()),
                 new Claim("isAdmin", user.IsAdmin.ToString().ToLower())
