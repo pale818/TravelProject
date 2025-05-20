@@ -1,0 +1,92 @@
+﻿﻿@{
+    ViewData["Title"] = "User Profile";
+}
+
+<h2 class="text-center my-4">User Profile</h2>
+
+<div class="container d-flex justify-content-center align-items-start">
+    <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
+        <form id="profileForm">
+            <input type="hidden" id="Id" />
+
+            <div class="mb-3">
+                <label for="UserName" class="form-label">Username:</label>
+                <input type="text" id="userName" class="form-control" disabled />
+            </div>
+            <div class="mb-3">
+                <label for="Email" class="form-label">Email:</label>
+                <input type="email" id="email" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="FirstName" class="form-label">First Name:</label>
+                <input type="text" id="firstName" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="LastName" class="form-label">Last Name:</label>
+                <input type="text" id="lastName" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="PhoneNumber" class="form-label">Phone Number:</label>
+                <input type="text" id="phoneNumber" class="form-control" />
+            </div>
+
+            <button type="button" class="btn btn-success w-100" onclick="saveProfile()">Save</button>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+        console.log("Token from localStorage:", token);
+
+        function loadProfile() {
+            fetch("https://localhost:7172/api/ApplicationUser/me", {
+                method: "GET",
+                headers: { "Authorization": "Bearer " + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                for (const key in data) {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = data[key];
+                    }
+                }
+            });
+        }
+
+        function saveProfile() {
+            const updatedUser = {
+                email: document.getElementById("email").value,
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                phoneNumber: document.getElementById("phoneNumber").value
+            };
+
+            fetch("https://localhost:7172/api/ApplicationUser/me", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(updatedUser)
+            })
+            .then(res => {
+                if (res.ok) alert("Profile updated!");
+                else alert("Update failed!");
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadProfile);
+    </script>
+}
