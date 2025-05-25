@@ -1,12 +1,9 @@
-﻿namespace Travel.API.Models
+﻿namespace Travel.API.Dtos
 {
-    public class Destination
+    public class DestinationDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Country { get; set; }
-
-        public ICollection<Trip> Trips { get; set; } = new List<Trip>();
-
     }
 }

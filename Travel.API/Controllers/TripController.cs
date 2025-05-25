@@ -1,14 +1,10 @@
-﻿/*
- * Trip controller
- */
-
-// Gives access to MVC features, especially [ApiController], ControllerBase, and ActionResult.
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // Required for ToListAsync() and other EF Core async database methods.
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Models;
+using Travel.API.Dtos;
 
 namespace Travel.API.Controllers
 {
@@ -34,17 +30,44 @@ namespace Travel.API.Controllers
 
 
         // **********************************************************
+
         // GET: api/trip
-        [HttpGet] // Marks the method as handling HTTP GET requests for /api/trip.
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Trip>>> GetTrips()
+        {
+            return await _context.Trips.ToListAsync();
+        }
+
+
+        // GET: api/trip
+        [HttpGet("guides")] // Marks the method as handling HTTP GET requests for /api/trip/guides.
         /*
          * The method is asynchronous.
 	     • It returns a list of trips (IEnumerable<Trip>) wrapped in an ActionResult (so you can return status codes later, if needed).
          */
-        public async Task<ActionResult<IEnumerable<Trip>>> GetTrips()
+        public async Task<ActionResult<IEnumerable<Trip>>> GetTripsGuides()
         {
             // await _context.Trips.ToListAsync(); - Uses Entity Framework Core to asynchronously fetch all records from the Trips table.
             // Returns the list of trips as JSON.
-            return await _context.Trips.ToListAsync();
+            //return await _context.Trips.ToListAsync();
+
+            var trips = await _context.Trips
+                .Include(t => t.Guides)
+                .ToListAsync();
+
+            var result = trips.Select(t => new TripDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Guides = t.Guides.Select(g => new GuideDto
+                {
+                    Id = g.Id,
+                    FirstName = g.FirstName,
+                    LastName = g.LastName
+                }).ToList()
+            }).ToList();
+
+            return Ok(result);
         }
 
         /*
@@ -81,6 +104,10 @@ namespace Travel.API.Controllers
         {
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
+
+            // logging
+            await LogAction("Create", "Trip", trip.Id);
+
 
             return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, trip);
         }
@@ -123,6 +150,10 @@ namespace Travel.API.Controllers
                 }
             }
 
+            // logging
+            await LogAction("Update", "Trip", trip.Id);
+
+
             return NoContent();
         }
 
@@ -151,7 +182,149 @@ namespace Travel.API.Controllers
             _context.Trips.Remove(trip);
             await _context.SaveChangesAsync();
 
+            // logging
+            await LogAction("Delete", "Trip", trip.Id);
+
+
             return NoContent();
         }
+
+
+
+
+        [HttpPut("{id}/guides")]
+        public async Task<IActionResult> UpdateTripGuides(int id, [FromBody] TripGuideUpdate dto)
+        {
+            var trip = await _context.Trips.Include(t => t.Guides).FirstOrDefaultAsync(t => t.Id == id);
+            if (trip == null) return NotFound();
+
+            var guides = await _context.Guides.Where(g => dto.GuideIds.Contains(g.Id)).ToListAsync();
+            trip.Guides = guides;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+
+
+        // FOR PAGINATION
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Trip>>> SearchTrips(
+            [FromQuery] string? query = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            if (page < 1 || pageSize < 1) return BadRequest("Invalid paging parameters.");
+
+            var tripQuery = _context.Trips.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                tripQuery = tripQuery.Where(t => t.Name.Contains(query) || (t.Description != null && t.Description.Contains(query)));
+            }
+
+            var totalCount = await tripQuery.CountAsync();
+            var trips = await tripQuery
+                .OrderBy(t => t.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+
+            var response = new
+            {
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                Data = trips,
+            };
+
+            return Ok(response);
+        }
+
+        // GET: api/trip/{id}/destinations
+        [HttpGet("{id}/destinations")]
+        public async Task<ActionResult<IEnumerable<DestinationDto>>> GetTripDestinations(int id)
+        {
+            var trip = await _context.Trips
+                .Include(t => t.Destinations)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (trip == null) return NotFound();
+
+            var result = trip.Destinations.Select(d => new DestinationDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Country = d.Country
+            }).ToList();
+
+            return Ok(result);
+        }
+
+
+
+        // PUT: api/trip/{id}/destinations
+        [HttpPut("{id}/destinations")]
+        public async Task<IActionResult> UpdateTripDestinations(int id, [FromBody] List<int> destinationIds)
+        {
+            var trip = await _context.Trips
+                .Include(t => t.Destinations)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (trip == null)
+                return NotFound();
+
+            var destinations = await _context.Destinations
+                .Where(d => destinationIds.Contains(d.Id))
+                .ToListAsync();
+
+            trip.Destinations = destinations;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+
+        // FOR LOGGING TRIPS
+        private async Task LogAction(string action, string entity, int entityId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                return; // skip logging if userId not found
+
+            var log = new Log
+            {
+                UserId = userId,
+                Action = action,
+                Entity = entity,
+                EntityId = entityId,
+                Timestamp = DateTime.Now
+            };
+
+            _context.Logs.Add(log);
+            await _context.SaveChangesAsync();
+        }
+
+
+    }
+
+
+
+    // DTOs for GUide Trip relation
+    public class TripDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public List<GuideDto> Guides { get; set; } = new();
+    }
+
+    public class GuideDto
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
     }
 }
+

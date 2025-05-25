@@ -1,0 +1,197 @@
+﻿﻿@{
+    ViewData["Title"] = "Trip & Guide Management";
+    var sectionTitle = ViewData["SectionTitle"] ?? "Manage Trip-Guide Assignments";
+    var token = Context.Session.GetString("JWToken");
+}
+
+@section Styles {
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .landing-page {
+            position: relative;
+            background: url('/images/backgroundLandingPage.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding-top: 40px;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .dashboard-content {
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            text-align: center;
+        }
+
+            .dashboard-content h2 {
+                font-size: 2.5rem;
+                margin-bottom: 30px;
+                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+            }
+
+        .dashboard-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .trip-actions button {
+            margin-left: 10px;
+        }
+
+        select[multiple] {
+            height: 100px;
+        }
+    </style>
+}
+
+<div class="landing-page">
+    <div class="overlay"></div>
+
+    <div class="container dashboard-content">
+        <h2>@sectionTitle</h2>
+        <div class="dashboard-card">
+            <button class="btn btn-success mb-3" onclick="showAddForm()">+ Add Trip Guide Relation</button>
+
+            <div class="table-responsive">
+                <div class="table-scroll-wrapper">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Trip</th>
+                                <th>Assigned Guides</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tripGuideTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="addEditForm" style="display:none;">
+                <h5 id="formTitle">Assign Guides to Trip</h5>
+                <select id="tripSelector" class="form-control mb-2"></select>
+                <select id="guideSelector" class="form-control mb-2" multiple></select>
+                <button class="btn btn-primary" onclick="submitRelation()">Save</button>
+                <button class="btn btn-primary" onclick="clearGuideSelection()">Clear Guides</button>
+                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+        let trips = [];
+        let guides = [];
+
+        async function loadData() {
+            [trips, guides] = await Promise.all([
+                fetch("https://localhost:7172/api/trip/guides", { headers: { "Authorization": "Bearer " + token } }).then(r => r.json()),
+                fetch("https://localhost:7172/api/guide", { headers: { "Authorization": "Bearer " + token } }).then(r => r.json())
+            ]);
+            console.log('trips',trips);
+            console.log('guides',guides);
+
+            updateTable();
+            fillFormSelectors();
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById("tripGuideTableBody");
+            tbody.innerHTML = "";
+            trips.forEach(trip => {
+                console.log('trip',trip);
+
+                const guideNames = trip.guides?.map(g => `${g.firstName} ${g.lastName}`).join(", ") || "";
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${trip.name}</td>
+                        <td>${guideNames}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editTripGuide(${trip.id})">Edit</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function fillFormSelectors() {
+            const tripSel = document.getElementById("tripSelector");
+            const guideSel = document.getElementById("guideSelector");
+            tripSel.innerHTML = trips.map(t => `<option value="${t.id}">${t.name}</option>`).join("");
+            guideSel.innerHTML = guides.map(g => `<option value="${g.id}">${g.firstName} ${g.lastName}</option>`).join("");
+        }
+
+        function showAddForm() {
+            document.getElementById("formTitle").innerText = "Assign Guides to Trip";
+            document.getElementById("tripSelector").disabled = false;
+            document.getElementById("guideSelector").selectedIndex = -1;
+            document.getElementById("addEditForm").style.display = "block";
+        }
+
+        function hideForm() {
+            document.getElementById("addEditForm").style.display = "none";
+        }
+
+        function editTripGuide(tripId) {
+            const trip = trips.find(t => t.id === tripId);
+            document.getElementById("tripSelector").value = trip.id;
+            document.getElementById("tripSelector").disabled = true;
+            document.getElementById("formTitle").innerText = `Edit Guides for "${trip.name}"`;
+            const guideSel = document.getElementById("guideSelector");
+
+            Array.from(guideSel.options).forEach(opt => {
+                opt.selected = trip.guides?.some(g => g.id == opt.value);
+            });
+
+            document.getElementById("addEditForm").style.display = "block";
+        }
+
+        function submitRelation() {
+            const tripId = parseInt(document.getElementById("tripSelector").value);
+            const selectedGuideIds = Array.from(document.getElementById("guideSelector").selectedOptions).map(o => parseInt(o.value));
+
+            fetch(`https://localhost:7172/api/trip/${tripId}/guides`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ id: tripId, guideIds: selectedGuideIds })
+            })
+            .then(res => {
+                if (res.ok) {
+                    alert("Trip-Guide relation updated");
+                    loadData();
+                    hideForm();
+                } else {
+                    alert("Error saving relation.");
+                }
+            });
+        }
+
+        function clearGuideSelection() {
+            const guideSel = document.getElementById("guideSelector");
+            Array.from(guideSel.options).forEach(opt => opt.selected = false);
+        }
+
+
+        document.addEventListener("DOMContentLoaded", loadData);
+    </script>
+}

@@ -55,7 +55,7 @@ namespace Travel.API.Controllers
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,
-                IsAdmin = request.IsAdmin
+                IsAdmin = request.IsAdmin 
             };
 
             _context.ApplicationUsers.Add(user);

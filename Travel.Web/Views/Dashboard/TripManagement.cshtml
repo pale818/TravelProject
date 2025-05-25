@@ -1,0 +1,286 @@
+﻿﻿@{
+    ViewData["Title"] = "Trip Management";
+    var sectionTitle = ViewData["SectionTitle"] ?? "Manage Trips";
+    var token = Context.Session.GetString("JWToken");
+}
+
+@section Styles {
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .landing-page {
+            position: relative;
+            background: url('/images/backgroundLandingPage.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding-top: 40px;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        .dashboard-content {
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            text-align: center;
+        }
+
+            .dashboard-content h2 {
+                font-size: 2.5rem;
+                margin-bottom: 30px;
+                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+            }
+
+        .dashboard-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .trip-actions button {
+            margin-left: 10px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 400px;
+        }
+    </style>
+}
+
+<div class="landing-page">
+    <div class="overlay"></div>
+    <div class="container dashboard-content">
+        <h2>@sectionTitle</h2>
+        <div class="dashboard-card">
+            <button class="btn btn-success mb-3" onclick="showAddForm()">+ Add Trip</button>
+            <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search trips..." oninput="onSearchInput()" />
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Price</th>
+                            <th>Destinations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tripTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="addEditForm" style="display:none;">
+                <h5 id="formTitle">Add Trip</h5>
+                <input type="hidden" id="tripId" />
+                <input type="text" id="name" placeholder="Name" class="form-control mb-2" />
+                <textarea id="description" placeholder="Description" class="form-control mb-2"></textarea>
+                <input type="date" id="dateFrom" class="form-control mb-2" />
+                <input type="date" id="dateTo" class="form-control mb-2" />
+                <input type="number" id="price" placeholder="Price" class="form-control mb-2" step="0.01" />
+                <button class="btn btn-primary" onclick="submitForm()">Save</button>
+                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
+
+            <div id="pagination" class="mb-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Destination modal -->
+<div id="destinationModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h5>Manage Destinations</h5>
+        <div id="destinationList"></div>
+        <button class="btn btn-primary mt-2" onclick="saveDestinations()">Save</button>
+        <button class="btn btn-secondary mt-2" onclick="closeDestinationModal()">Close</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+        let currentPage = 1;
+        const pageSize = 5;
+        let allDestinations = [];
+        let editingTripId = null;
+
+        function onSearchInput() {
+            currentPage = 1;
+            loadTrips(currentPage);
+        }
+
+        async function loadTrips(page = 1) {
+            const query = document.getElementById("searchInput")?.value || "";
+            const res = await fetch(`https://localhost:7172/api/trip/search?page=${page}&pageSize=${pageSize}&query=${encodeURIComponent(query)}`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            const result = await res.json();
+            const trips = result.data || result;
+            const totalPages = Math.ceil(result.totalCount / pageSize);
+
+            const tbody = document.getElementById("tripTableBody");
+            tbody.innerHTML = trips.length === 0
+                ? `<tr><td colspan="7" class="text-center">No trips found.</td></tr>`
+                : trips.map(t => `
+                    <tr>
+                        <td>${t.name}</td>
+                        <td>${t.description || ""}</td>
+                        <td>${t.dateFrom?.split('T')[0]}</td>
+                        <td>${t.dateTo?.split('T')[0]}</td>
+                        <td>${t.price.toFixed(2)}</td>
+                        <td><button class="btn btn-sm btn-info" onclick="openDestinationModal(${t.id})">Manage</button></td>
+                        <td class="trip-actions">
+                            <button class="btn btn-sm btn-warning" onclick="editTrip(${t.id}, '${t.name}', \`${t.description || ""}\`, '${t.dateFrom}', '${t.dateTo}', ${t.price})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTrip(${t.id})">Delete</button>
+                        </td>
+                    </tr>`).join("");
+
+            const paginationDiv = document.getElementById("pagination");
+            paginationDiv.innerHTML = "";
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.className = `btn btn-sm btn-${i === page ? "primary" : "light"} me-1`;
+                btn.addEventListener("click", () => loadTrips(i));
+                paginationDiv.appendChild(btn);
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById("addEditForm").style.display = "block";
+            document.getElementById("formTitle").innerText = "Add Trip";
+            ["tripId", "name", "description", "dateFrom", "dateTo", "price"].forEach(id => document.getElementById(id).value = "");
+        }
+
+        function editTrip(id, name, description, dateFrom, dateTo, price) {
+            document.getElementById("addEditForm").style.display = "block";
+            document.getElementById("formTitle").innerText = "Edit Trip";
+            document.getElementById("tripId").value = id;
+            document.getElementById("name").value = name;
+            document.getElementById("description").value = description;
+            document.getElementById("dateFrom").value = dateFrom.split('T')[0];
+            document.getElementById("dateTo").value = dateTo.split('T')[0];
+            document.getElementById("price").value = price;
+        }
+
+        function hideForm() {
+            document.getElementById("addEditForm").style.display = "none";
+        }
+
+        async function submitForm() {
+            const idValue = document.getElementById("tripId").value;
+            const isEdit = !!idValue;
+
+            const trip = {
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                dateFrom: document.getElementById("dateFrom").value,
+                dateTo: document.getElementById("dateTo").value,
+                price: parseFloat(document.getElementById("price").value)
+            };
+
+            if (isEdit) trip.id = parseInt(idValue);
+
+            const method = isEdit ? "PUT" : "POST";
+            const url = isEdit ? `https://localhost:7172/api/trip/${trip.id}` : "https://localhost:7172/api/trip";
+
+            await fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(trip)
+            });
+            loadTrips(currentPage);
+            hideForm();
+        }
+
+        async function deleteTrip(id) {
+            if (confirm("Are you sure you want to delete this trip?")) {
+                await fetch(`https://localhost:7172/api/trip/${id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                loadTrips(currentPage);
+            }
+        }
+
+        async function openDestinationModal(tripId) {
+            editingTripId = tripId;
+            const res = await fetch("https://localhost:7172/api/destination", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            allDestinations = await res.json();
+
+            const assignedRes = await fetch(`https://localhost:7172/api/trip/${tripId}/destinations`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            const assigned = await assignedRes.json();
+
+            const container = document.getElementById("destinationList");
+            container.innerHTML = allDestinations.map(dest => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dest-${dest.id}" value="${dest.id}" ${assigned.some(d => d.id === dest.id) ? 'checked' : ''} />
+                    <label class="form-check-label" for="dest-${dest.id}">${dest.name}</label>
+                </div>`).join("");
+
+            document.getElementById("destinationModal").style.display = "flex";
+        }
+
+        async function saveDestinations() {
+            const selected = Array.from(document.querySelectorAll("#destinationList input:checked")).map(input => parseInt(input.value));
+            await fetch(`https://localhost:7172/api/trip/${editingTripId}/destinations`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(selected)
+            });
+            closeDestinationModal();
+            loadTrips(currentPage);
+        }
+
+        function closeDestinationModal() {
+            document.getElementById("destinationModal").style.display = "none";
+            editingTripId = null;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => loadTrips(currentPage));
+    </script>
+}

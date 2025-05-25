@@ -1,22 +1,50 @@
-html {
-  font-size: 14px;
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    position: static; /* Only needed if you're overriding layout behavior */
+    margin-bottom: 0; /* Prevents layout bump from base styles */
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.landing-page {
+    height: 100vh;
+    background-image: url('/images/backgroundLandingPage.jpg');
+    background-color: aqua;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Optional, if you want centered vertically */
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px #000;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-body {
-  margin-bottom: 60px;
+.loginRegisterBackground {
+    background-color: #e6f2ff;
+    min-height: 100vh;
+    padding-top: 10px;
+}
+
+.table-scroll-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
 }

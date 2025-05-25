@@ -16,6 +16,6 @@ namespace Travel.API.Models
 
         // part responsible for the bridge table between Trip and Guide
         public ICollection<Guide> Guides { get; set; } = new List<Guide>();
-
+        public ICollection<Destination> Destinations { get; set; } = new List<Destination>();
     }
 }

@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Travel.API.Data;
+using Travel.API.Dtos;
 using Travel.API.Models;
 
 namespace Travel.API.Controllers
 {
-    // secure authorization, use JWT
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -23,22 +21,37 @@ namespace Travel.API.Controllers
 
         // GET: api/wishlist
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Wishlist>>> GetWishlist()
+        public async Task<ActionResult<IEnumerable<WishlistReadDto>>> GetWishlist()
         {
             return await _context.Wishlists
                 .Include(w => w.Trip)
-                .Include(w => w.User)
+                .Select(w => new WishlistReadDto
+                {
+                    Id = w.Id,
+                    TripId = w.TripId,
+                    TripName = w.Trip.Name,
+                    TripPrice = w.Trip.Price,
+                    DesiredDateFrom = w.DesiredDateFrom,
+                    DesiredDateTo = w.DesiredDateTo,
+                    CreatedAt = w.CreatedAt
+                })
                 .ToListAsync();
         }
+
 
         // GET: api/wishlist/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Wishlist>> GetWishlist(int id)
         {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user ID");
+            }
+
             var wishlist = await _context.Wishlists
                 .Include(w => w.Trip)
-                .Include(w => w.User)
-                .FirstOrDefaultAsync(w => w.Id == id);
+                .FirstOrDefaultAsync(w => w.Id == id && w.UserId == userId);
 
             if (wishlist == null)
             {
@@ -50,19 +63,69 @@ namespace Travel.API.Controllers
 
         // POST: api/wishlist
         [HttpPost]
-        public async Task<ActionResult<Wishlist>> PostWishlist(Wishlist wishlist)
+        public async Task<ActionResult<WishlistReadDto>> PostWishlist(WishlistCreateDto dto)
         {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user ID");
+            }
+
+            var exists = await _context.Wishlists
+                .AnyAsync(w => w.UserId == userId && w.TripId == dto.TripId);
+
+            if (exists)
+            {
+                return Conflict("Trip already exists in wishlist.");
+            }
+
+            var wishlist = new Wishlist
+            {
+                UserId = userId,
+                TripId = dto.TripId,
+                DesiredDateFrom = dto.DesiredDateFrom,
+                DesiredDateTo = dto.DesiredDateTo,
+                CreatedAt = DateTime.UtcNow
+            };
+
             _context.Wishlists.Add(wishlist);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetWishlist", new { id = wishlist.Id }, wishlist);
+            // Reload with Trip
+            var fullWishlist = await _context.Wishlists
+                .Include(w => w.Trip)
+                .FirstOrDefaultAsync(w => w.Id == wishlist.Id);
+
+            // Return DTO with Trip info
+            var result = new WishlistReadDto
+            {
+                Id = fullWishlist.Id,
+                TripId = fullWishlist.TripId,
+                TripName = fullWishlist.Trip?.Name,
+                TripPrice = fullWishlist.Trip?.Price ?? 0,
+                DesiredDateFrom = fullWishlist.DesiredDateFrom,
+                DesiredDateTo = fullWishlist.DesiredDateTo,
+                CreatedAt = fullWishlist.CreatedAt
+            };
+
+            return CreatedAtAction(nameof(GetWishlist), new { id = result.Id }, result);
         }
+
+
 
         // DELETE: api/wishlist/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWishlist(int id)
         {
-            var wishlist = await _context.Wishlists.FindAsync(id);
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized("Invalid user ID");
+            }
+
+            var wishlist = await _context.Wishlists
+                .FirstOrDefaultAsync(w => w.Id == id && w.UserId == userId);
+
             if (wishlist == null)
             {
                 return NotFound();
