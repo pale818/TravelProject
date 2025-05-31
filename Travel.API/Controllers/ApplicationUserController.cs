@@ -86,19 +86,6 @@ namespace Travel.API.Controllers
         }
 
 
-        //PUT: 
-        /*[HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, ApplicationUser user)
-        {
-            if (id != user.Id) return BadRequest();
-
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }*/
-
-
 
         //PUT: for updating user, for administartor
         [HttpPut("{id}")]
