@@ -1,7 +1,6 @@
 ﻿﻿@{
     ViewData["Title"] = "Login";
     var isLoggedIn = Context.Session.GetString("JWToken") != null;
-
 }
 
 @if (TempData["SuccessMessage"] != null && isLoggedIn)

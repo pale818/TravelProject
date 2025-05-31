@@ -55,6 +55,8 @@ namespace Travel.Web.Controllers
                 {
 
                     HttpContext.Session.SetString("JWToken", result.Token);
+                    Console.WriteLine($"Profile TOKEN: {result.Token}");
+                    TempData["Token"] = result.Token;
                     TempData["SuccessMessage"] = "Successful log in.";
 
                     // this is .Net redirection function meaning: "Dashboard" is razor page (cshtml) and "Home" is folder where
@@ -76,7 +78,10 @@ namespace Travel.Web.Controllers
         [HttpPost]
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // remove all session data, including JWToken
+            Console.WriteLine("Logout executed");
+
+            //HttpContext.Session.Remove("JWToken");
+            //HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");
         }
 

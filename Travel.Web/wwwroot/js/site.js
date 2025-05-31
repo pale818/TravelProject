@@ -17,7 +17,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             alert.classList.remove('show');
 
             // completely remove the element after transition
-            setTimeout(() => alert.remove(), 500);
-        }, 2000); // in ms
+            //setTimeout(() => alert.remove(), 500);
+        }, 3000); // in ms
     });
 });

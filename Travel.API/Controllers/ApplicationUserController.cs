@@ -53,7 +53,7 @@ namespace Travel.API.Controllers
         [HttpGet("me")]
         public async Task<ActionResult<ApplicationUser>> GetCurrentUser()
         {
-            Console.WriteLine($"User:: {User}");
+            Console.WriteLine($"User:: {User.Identity?.Name}");
 
             /*NameClaimType = ClaimTypes.Name tells the system
              * "Use the Name claim from JWT as the current user's identity."

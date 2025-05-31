@@ -1,11 +1,18 @@
 ﻿﻿@{
     ViewData["Title"] = "Dashboard";
     var isAdmin = (ViewBag.IsAdmin as bool?) ?? false;
-    var token = TempData["JwtToken"]; // reads JWT token from previous file where it was saved via TempData (it was AccountController)
-    var isLoggedIn = Context.Session.GetString("JWToken") != null;
 }
 
-@if (TempData["SuccessMessage"] != null && isLoggedIn)
+@section Scripts {
+    <script>
+        const token = '@TempData["JwtToken"]';
+        if (token && token !== 'null' && token !== '') {
+            localStorage.setItem("jwtToken", token);
+        }
+    </script>
+}
+
+@if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         @TempData["SuccessMessage"]
@@ -41,25 +48,3 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-<!--vjerojatno netreba-->
-
-@*
-@section Scripts {
-    <script>
-        const token = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(token));
-        if (token) {
-            localStorage.setItem("jwtToken", token);
-            console.log("Token saved to localStorage:", token);
-        }
-    </script>
-}
-*@

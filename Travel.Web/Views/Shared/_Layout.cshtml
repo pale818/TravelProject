@@ -1,9 +1,4 @@
-﻿﻿@{
-    var isAdmin = User.Claims.FirstOrDefault(c => c.Type == "isAdmin")?.Value == "true";
-}
-
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -98,8 +93,6 @@
     <!--   inject custom CSS and srcipt from wwwroot into the layout -->
     @RenderSection("Styles", required: false)
     @await RenderSectionAsync("Scripts", required: false)
-
-
 
 </body>
 </html>
