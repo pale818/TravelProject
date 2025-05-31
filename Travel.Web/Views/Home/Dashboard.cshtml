@@ -4,82 +4,6 @@
     var token = TempData["JwtToken"]; // reads JWT token from previous file where it was saved via TempData (it was AccountController)
     var isLoggedIn = Context.Session.GetString("JWToken") != null;
 }
-@section Styles {
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .landing-page {
-            position: relative;
-            background: url('/images/backgroundLandingPage.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* semi-transparent dark layer */
-            z-index: 0;
-        }
-
-        .dashboard-content {
-            position: relative;
-            z-index: 1;
-            color: #fff;
-            text-align: center;
-        }
-
-            .dashboard-content h2 {
-                font-size: 2.5rem;
-                margin-bottom: 30px;
-                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-            }
-
-        .dashboard-card {
-            background-color: rgba(255, 255, 255, 0.85);
-            color: #333;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .list-group-item {
-            background-color: transparent;
-            border: none;
-            font-size: 1.1rem;
-            transition: 0.2s ease-in-out;
-        }
-
-            .list-group-item a {
-                text-decoration: none;
-                color: #007bff;
-            }
-
-            .list-group-item:hover {
-                background-color: rgba(0, 123, 255, 0.1);
-            }
-
-        @@media (max-width: 768px) {
-            .dashboard-card {
-                padding: 20px;
-            }
-
-            .dashboard-content h2 {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
-}
 
 @if (TempData["SuccessMessage"] != null && isLoggedIn)
 {
@@ -102,11 +26,11 @@
                 <ul class="list-group">
                     @if (isAdmin)
                     {
-                        <li class="list-group-item"><a href="/Dashboard/UserManagement">User Management</a></li>
-                        <li class="list-group-item"><a href="/Dashboard/TripManagement">Trip Management</a></li>
-                        <li class="list-group-item"><a href="/Dashboard/GuideManagement">Guide Management</a></li>
-                        <li class="list-group-item"><a href="/Dashboard/TripGuideManagement">Trip and Guide Management</a></li>
-                        <li class="list-group-item"><a href="/Dashboard/DestinationManagement">Destination Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/UserManagement" class="text-decoration-none">User Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/TripManagement" class="text-decoration-none">Trip Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/GuideManagement" class="text-decoration-none">Guide Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/TripGuideManagement" class="text-decoration-none">Trip and Guide Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/DestinationManagement" class="text-decoration-none">Destination Management</a></li>
                     }
                     else
                     {

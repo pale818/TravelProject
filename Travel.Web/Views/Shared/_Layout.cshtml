@@ -1,6 +1,8 @@
 ﻿﻿@{
     var isAdmin = User.Claims.FirstOrDefault(c => c.Type == "isAdmin")?.Value == "true";
 }
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,12 +12,18 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Travel.Web.styles.css" asp-append-version="true" />
+
+    <!-- Google Fonts: place here for global usage -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Hebrew:wght@100..800&family=Playpen+Sans+Thai:wght@100..800&display=swap" rel="stylesheet">
+
 </head>
 <body>
 
     <!-- HEADER-->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light" style="background-color: orange;">
+        <nav class="navbar navbar-expand-sm navbar-light fixed-top" style="background-color: orange;">
             <div class="container-fluid">
                 <a class="navbar-brand text-dark" asp-controller="Home" asp-action="Index">Travel Paola</a>
 
@@ -54,7 +62,7 @@
 
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link text-dark">Logout</button>
+                                    <button type="submit" class="logout-link">Logout</button>
                                 </form>
                             </li>
                         }
@@ -66,16 +74,20 @@
 
 
     <!-- Main Content Placeholder -->
-    <main role="main" class="pb-3">
+    
+    <main role="main" class="pb-3 pt-5">
         @RenderBody()
     </main>
+    
 
     <!-- FOOTER -->
+   <!--
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2025 - Travel.Web - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    -->
 
 
     <!--bootstrap-->

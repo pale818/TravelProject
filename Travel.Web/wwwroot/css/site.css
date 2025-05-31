@@ -1,11 +1,25 @@
 html, body {
+    font-family: 'Playpen Sans Hebrew', sans-serif;
+    height: 100%;
     margin: 0;
     padding: 0;
     height: 100%;
     position: static; /* Only needed if you're overriding layout behavior */
     margin-bottom: 0; /* Prevents layout bump from base styles */
-    font-size: 14px;
+    font-size: 20px;
 }
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+    overflow-y: auto;
+    margin-top: -64px; /* Height of Bootstrap fixed-top navbar */
+}
+
 
 @media (min-width: 768px) {
     html {
@@ -27,7 +41,11 @@ html, body {
     justify-content: center; /* Optional, if you want centered vertically */
     text-align: center;
     color: white;
-    text-shadow: 2px 2px 4px #000;
+}
+
+.landing-page .btn {
+    margin: 10px;
+    width: 150px;
 }
 
 .btn:focus,
@@ -41,10 +59,21 @@ html, body {
 .loginRegisterBackground {
     background-color: #e6f2ff;
     min-height: 100vh;
-    padding-top: 10px;
+    padding-top: 74px;
 }
 
 .table-scroll-wrapper {
     max-height: 400px;
     overflow-y: auto;
+}
+
+
+
+.logout-link {
+    all: unset; /* Reset all default button styles */
+    cursor: pointer; /* Make it behave like a link */
+    color: #000; /* Text color (adjust to match nav links) */
+    text-decoration: none; /* Remove underline if present */
+    padding: 8px; /* Match nav-link spacing */
+    font: inherit; /* Match surrounding font */
 }

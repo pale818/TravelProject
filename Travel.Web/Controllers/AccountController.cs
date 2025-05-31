@@ -35,11 +35,7 @@ namespace Travel.Web.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-               
                     return RedirectToAction("Login");
-                
-
-
             }
             ModelState.AddModelError("", "Registration failed.");
             return View(model);
