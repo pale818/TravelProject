@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
+using Travel.API.Dtos;
 using Travel.API.Models;
 
 namespace Travel.API.Controllers
@@ -88,5 +89,22 @@ namespace Travel.API.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+
+        // delete guides form some trip
+        [HttpPut("{id}/guides")]
+        public async Task<IActionResult> UpdateTripGuides(int id, [FromBody] TripGuideUpdate dto)
+        {
+            var trip = await _context.Trips.Include(t => t.Guides).FirstOrDefaultAsync(t => t.Id == id);
+            if (trip == null) return NotFound();
+
+            // update with possibly empty list — will remove all guides
+            var guides = await _context.Guides.Where(g => dto.GuideIds.Contains(g.Id)).ToListAsync();
+            trip.Guides = guides;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
     }
 }

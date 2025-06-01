@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿/*
+ * Trip controller
+ */
+
+// Gives access to MVC features, especially [ApiController], ControllerBase, and ActionResult.
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // Required for ToListAsync() and other EF Core async database methods.
 using Microsoft.EntityFrameworkCore;
@@ -327,4 +332,3 @@ namespace Travel.API.Controllers
         public string LastName { get; set; } = string.Empty;
     }
 }
-

@@ -1,4 +1,6 @@
-﻿namespace Travel.API.Dtos
+﻿using Travel.API.Models;
+
+namespace Travel.API.Dtos
 {
     public class DestinationDto
     {
