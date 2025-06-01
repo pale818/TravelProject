@@ -22,6 +22,11 @@
             <div class="container-fluid">
                 <a class="navbar-brand text-dark" asp-controller="Home" asp-action="Index">Travel Paola</a>
 
+                <!-- Page title injected into navbar -->
+                <span class="navbar-text text-white fw-bold ms-3">
+                    @ViewData["Title"]
+                </span>
+
                 <!-- Toggle button for mobile -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
