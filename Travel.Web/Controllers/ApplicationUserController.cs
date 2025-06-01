@@ -24,6 +24,7 @@ namespace Travel.Web.Controllers
             return View();
         }
 
+        /*
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -51,9 +52,10 @@ namespace Travel.Web.Controllers
             var userResponse = System.Text.Json.JsonSerializer.Deserialize<UpdateUser>(content);
             return View(userResponse);
         }
+        */
 
 
-
+        /*
         [HttpPut]
         public async Task<IActionResult> UpdateProfile(UpdateUser model)
         {
@@ -90,7 +92,7 @@ namespace Travel.Web.Controllers
             ViewBag.Message = "Update failed.";
             return View("Profile", model);
         }
-
+        */
 
 
         // FOR USER PROFILE

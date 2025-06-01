@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Models;
 
-// That file (ApplicationDbContext.cs) defines your EF Core database context, which is the central bridge between:
+// This file (ApplicationDbContext.cs) defines your EF Core database context, which is the central bridge between:
 // C# models (Trip, Destination, etc.)
 // actual database tables
 namespace Travel.API.Data
@@ -66,6 +66,26 @@ namespace Travel.API.Data
                         j.ToTable("TripGuide"); // exactly matches your SQL table
                     });
 
+            modelBuilder.Entity<Trip>()
+                .HasMany(t => t.Destinations)
+                .WithMany(d => d.Trips)
+                .UsingEntity<Dictionary<string, object>>(
+                    "TripDestination",
+                    j => j
+                        .HasOne<Destination>()
+                        .WithMany()
+                        .HasForeignKey("DestinationId"),
+                    j => j
+                        .HasOne<Trip>()
+                        .WithMany()
+                        .HasForeignKey("TripId"),
+                    j =>
+                    {
+                        j.HasKey("TripId", "DestinationId");
+                        j.ToTable("TripDestination"); // table name matches your style
+                    });
+
+
             modelBuilder.Entity<ApplicationUser>().ToTable("ApplicationUser");
 
             modelBuilder.Entity<Wishlist>().ToTable("Wishlist");
@@ -73,6 +93,5 @@ namespace Travel.API.Data
             modelBuilder.Entity<Log>().ToTable("Log");
 
         }
-
     }
 }

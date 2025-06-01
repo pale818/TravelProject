@@ -93,6 +93,12 @@
     <!--   inject custom CSS and srcipt from wwwroot into the layout -->
     @RenderSection("Styles", required: false)
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Auto-remove token when loading login page
+        if (window.location.pathname.toLowerCase().includes("login")) {
+            localStorage.removeItem("jwtToken");
+        }
+    </script>
 
 </body>
 </html>
