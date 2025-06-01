@@ -26,13 +26,17 @@
                 </div>
             </div>
 
-            <div id="addEditForm" style="display:none;">
-                <h5 id="formTitle">Assign Guides to Trip</h5>
-                <select id="tripSelector" class="form-control mb-2"></select>
-                <select id="guideSelector" class="form-control mb-2" multiple></select>
-                <button class="btn btn-primary" onclick="submitRelation()">Save</button>
-                <button class="btn btn-primary" onclick="clearGuideSelection()">Clear Guides</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            <div id="addEditForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5 id="formTitle">Assign Guides to Trip</h5>
+                        <select id="tripSelector" class="form-control mb-2"></select>
+                        <select id="guideSelector" class="form-control mb-2" multiple></select>
+                        <button class="btn btn-primary" onclick="submitRelation()">Save</button>
+                        <button class="btn btn-primary" onclick="clearGuideSelection()">Clear Guides</button>
+                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </<div>
+                </div>
             </div>
         </div>
     </div>

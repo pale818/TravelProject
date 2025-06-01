@@ -30,21 +30,25 @@
                 </div>
             </div>
 
-            <div id="addEditForm" style="display:none;">
-                <h5 id="formTitle">Add User</h5>
-                <input type="hidden" id="userId" />
-                <input type="text" id="userName" placeholder="Username" class="form-control mb-2" />
-                <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
-                <input type="password" id="password" placeholder="Password" class="form-control mb-2" />
-                <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
-                <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
-                <input type="text" id="phoneNumber" placeholder="Phone Number" class="form-control mb-2" />
-                <div class="form-check mb-2 text-start">
-                    <input type="checkbox" id="isAdmin" class="form-check-input" />
-                    <label class="form-check-label" for="isAdmin">Is Admin</label>
+            <div id="addEditForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5 id="formTitle">Add User</h5>
+                        <input type="hidden" id="userId" />
+                        <input type="text" id="userName" placeholder="Username" class="form-control mb-2" />
+                        <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
+                        <input type="password" id="password" placeholder="Password" class="form-control mb-2" />
+                        <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
+                        <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
+                        <input type="text" id="phoneNumber" placeholder="Phone Number" class="form-control mb-2" />
+                        <div class="form-check mb-2 text-start">
+                            <input type="checkbox" id="isAdmin" class="form-check-input" />
+                            <label class="form-check-label" for="isAdmin">Is Admin</label>
+                        </div>
+                        <button class="btn btn-primary" onclick="submitForm()">Save</button>
+                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </<div>
                 </div>
-                <button class="btn btn-primary" onclick="submitForm()">Save</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
             </div>
         </div>
     </div>

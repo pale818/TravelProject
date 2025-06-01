@@ -28,15 +28,19 @@
                 </div>
             </div>
 
-            <div id="addEditForm" style="display:none;">
-                <h5 id="formTitle">Add Guide</h5>
-                <input type="hidden" id="guideId" />
-                <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
-                <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
-                <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
-                <textarea id="biography" placeholder="Biography" class="form-control mb-2"></textarea>
-                <button class="btn btn-primary" onclick="submitForm()">Save</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            <div id="addEditForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5 id="formTitle">Add Guide</h5>
+                        <input type="hidden" id="guideId" />
+                        <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
+                        <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
+                        <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
+                        <textarea id="biography" placeholder="Biography" class="form-control mb-2"></textarea>
+                        <button class="btn btn-primary" onclick="submitForm()">Save</button>
+                         <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </<div>
+                </div>
             </div>
         </div>
     </div>

@@ -50,10 +50,10 @@ main {
     color: white;
 }
 
-.landing-page .btn {
-    margin: 10px;
-    width: 150px;
-}
+    .landing-page .btn {
+        margin: 10px;
+        width: 150px;
+    }
 
 .btn:focus,
 .btn:active:focus,
@@ -61,6 +61,9 @@ main {
 .form-control:focus,
 .form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+.btn btn-primary {
+    justify-content: center !important;
 }
 
 .loginRegisterBackground {
@@ -139,14 +142,15 @@ select[multiple] {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 100;
+    padding-top: 40px;
 }
 
 .modal-content {
     background: white;
-    padding: 20px;
     border-radius: 10px;
     max-height: 80vh;
     overflow-y: auto;
     width: 400px;
 }
+

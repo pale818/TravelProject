@@ -28,16 +28,20 @@
                 </table>
             </div>
 
-            <div id="addEditForm" style="display:none;">
-                <h5 id="formTitle">Add Trip</h5>
-                <input type="hidden" id="tripId" />
-                <input type="text" id="name" placeholder="Name" class="form-control mb-2" />
-                <textarea id="description" placeholder="Description" class="form-control mb-2"></textarea>
-                <input type="date" id="dateFrom" class="form-control mb-2" />
-                <input type="date" id="dateTo" class="form-control mb-2" />
-                <input type="number" id="price" placeholder="Price" class="form-control mb-2" step="0.01" />
-                <button class="btn btn-primary" onclick="submitForm()">Save</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            <div id="addEditForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5 id="formTitle">Add Trip</h5>
+                        <input type="hidden" id="tripId" />
+                        <input type="text" id="name" placeholder="Name" class="form-control mb-2" />
+                        <textarea id="description" placeholder="Description" class="form-control mb-2"></textarea>
+                        <input type="date" id="dateFrom" class="form-control mb-2" />
+                        <input type="date" id="dateTo" class="form-control mb-2" />
+                        <input type="number" id="price" placeholder="Price" class="form-control mb-2" step="0.01" />
+                        <button class="btn btn-primary" onclick="submitForm()">Save</button>
+                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <div id="pagination" class="mb-3"></div>
