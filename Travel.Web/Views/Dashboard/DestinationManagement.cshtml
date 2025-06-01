@@ -47,6 +47,17 @@
     <script>
         const token = localStorage.getItem("jwtToken");
 
+    /*
+        * Loads all destinations from the backend API using a GET request.
+        * Adds the JWT token to the request headers for authentication.
+        * Once the data is retrieved and parsed as JSON:
+        *   - Clears any existing table rows inside the <tbody> with id="destinationTableBody"
+        *   - Iterates over the list of destinations
+        *   - Dynamically builds table rows (<tr>) with:
+        *       - Name and Country of the destination
+        *       - "Edit" and "Delete" buttons that call respective functions with destination ID and data
+        * The resulting HTML is injected into the DOM to display the destination list.
+        */
         function loadDestinations() {
             fetch("https://localhost:7172/api/destination", {
                 headers: { "Authorization": "Bearer " + token }
@@ -69,12 +80,20 @@
             });
         }
 
+        /*
+        * Displays the Add Destination form inside the modal.
+        * Clears any previously entered values and updates the modal title.
+        */
         function showAddForm() {
             document.getElementById("addEditForm").style.display = "block";
             document.getElementById("formTitle").innerText = "Add Destination";
             ["destinationId", "name", "country"].forEach(id => document.getElementById(id).value = "");
         }
 
+        /*
+        * Prepares the modal form for editing an existing destination.
+        * Populates the form fields with the selected destination's data and updates the modal title.
+        */
         function editDestination(id, name, country) {
             document.getElementById("addEditForm").style.display = "block";
             document.getElementById("formTitle").innerText = "Edit Destination";
@@ -83,10 +102,22 @@
             document.getElementById("country").value = country;
         }
 
+        /*
+        * Hides the Add/Edit form modal without saving any changes.
+        */
         function hideForm() {
             document.getElementById("addEditForm").style.display = "none";
         }
 
+        /*
+        * Handles form submission for both adding and editing a destination.
+        * Determines the operation mode (POST or PUT) based on presence of destination ID.
+        * Sends the data as JSON to the backend API.
+        * After a successful response:
+        *   - Reloads the destination list
+        *   - Hides the form modal
+        * If the response is not OK, displays an error message.
+        */
         function submitForm() {
             const idValue = document.getElementById("destinationId").value;
             const id = parseInt(idValue);
@@ -127,6 +158,12 @@
             });
         }
 
+
+        /*
+        * Deletes a destination after user confirmation.
+        * Sends a DELETE request to the backend API using the destination's ID.
+        * Refreshes the destination list if successful.
+        */
         function deleteDestination(id) {
             if (confirm("Are you sure you want to delete this destination?")) {
                 fetch(`https://localhost:7172/api/destination/${id}`, {
@@ -138,6 +175,10 @@
             }
         }
 
+        /*
+        * Automatically triggers when the DOM is fully loaded.
+        * Loads and displays the destination list by calling loadDestinations().
+        */
         document.addEventListener("DOMContentLoaded", loadDestinations);
     </script>
 }
