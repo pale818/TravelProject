@@ -1,11 +1,11 @@
 html, body {
     font-family: 'Playpen Sans Hebrew', sans-serif;
     height: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
     margin: 0;
     padding: 0;
     height: 100%;
-    position: static; /* Only needed if you're overriding layout behavior */
-    margin-bottom: 0; /* Prevents layout bump from base styles */
     font-size: 20px;
 }
 
@@ -21,15 +21,40 @@ main {
 }
 
 
-@media (min-width: 768px) {
+@media (min-width: 1000px) {
     html, body {
+        font-size: 16px;
+    }
+
+    .dashboard-card {
         font-size: 16px;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     html, body {
         font-size: 12px;
+    }
+
+    .dashboard-card {
+        font-size: 10px;
+    }
+}
+
+
+@media (min-height: 768px) {
+    html, body {
+        font-size: 16px;
+    }
+
+    .dashboard-card {
+        font-size: 20px;
+    }
+}
+
+@media (max-height: 600px) {
+    .dashboard-card {
+        font-size: 10px;
     }
 }
 
@@ -45,9 +70,12 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Optional, if you want centered vertically */
+    justify-content: center; 
     text-align: center;
     color: white;
+    
+
+    
 }
 
     .landing-page .btn {
@@ -73,8 +101,13 @@ main {
 }
 
 .table-scroll-wrapper {
-    max-height: 400px;
+    max-height: calc(100vh - 350px); /* adjust as needed */
     overflow-y: auto;
+    margin-top: 60px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
 }
 
 
@@ -88,25 +121,36 @@ main {
     font: inherit; /* Match surrounding font */
 }
 
+
+/**********************DAASHBOARD********************/
 .dashboard-content {
-    position: relative;
-    z-index: 1;
-    color: #fff;
-    text-align: center;
+    /*padding-bottom: 50px;*/
+    /*padding-top: 130px;*/
 }
 
-    .dashboard-content h2 {
-        font-size: 2.5rem;
-        margin-bottom: 30px;
-        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-    }
+
+.dashboard-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+}
 
 .dashboard-card {
     background-color: rgba(255, 255, 255, 0.9);
     color: #333;
     border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    margin-top:70px;
+    
+}
+
+.dashboard-card-main {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+    padding: 10px;
 }
 
 

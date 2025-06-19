@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,14 +21,48 @@ builder.Services.AddAuthentication("Bearer")
     {
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
+            /*
             ValidateIssuer = false, // change to true in production and configure issuer
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = false, // set to true and provide key if validating
+            */
+
+            ValidateIssuer = true,
+            ValidIssuer = "TravelApi",
+
+            ValidateAudience = true,
+            ValidAudience = "TravelApiUsers",
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("this_is_a_super_secret_key_1234567890!!")),
         };
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AllowAnonymousToPage("/Login");
+    options.Conventions.AllowAnonymousToPage("/Register");
+
+});
+
+builder.Services.Configure<JwtBearerOptions>("Bearer", options =>
+{
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            context.HandleResponse(); // suppress default 401
+
+            context.Response.Redirect("/Login");
+            return Task.CompletedTask;
+        }
+    };
+});
+
 
 var app = builder.Build();
 
@@ -48,6 +84,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",

@@ -1,7 +1,6 @@
 ﻿﻿@{
     ViewData["Title"] = "Trip Management";
-    //var sectionTitle = ViewData["SectionTitle"];
-    //var token = Context.Session.GetString("JWToken");
+    var token = Context.Session.GetString("JWToken");
 }
 
 <div class="landing-page">
@@ -63,7 +62,16 @@
     <script>
         const token = localStorage.getItem("jwtToken");
         let currentPage = 1;
-        const pageSize = 3;
+        let pageSize;
+
+        if (window.innerHeight < 400) {
+            pageSize = 1;
+        }else if (window.innerHeight < 600) {
+            pageSize = 2;
+        }else {
+            pageSize = 3;
+        }
+
         let allDestinations = [];
         let editingTripId = null;
 

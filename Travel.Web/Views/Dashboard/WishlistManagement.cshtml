@@ -17,6 +17,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Trip Name</th>
+                                <th>Trip Description</th>
                                 <th>Date From</th>
                                 <th>Date To</th>
                                 <th>Price</th>
@@ -28,13 +29,17 @@
                 </div>
             </div>
 
-            <div id="addForm" style="display:none;">
-                <h5>Add Trip to Wishlist</h5>
-                <select id="tripSelector" class="form-control mb-2"></select>
-                <input type="date" id="desiredDateFrom" class="form-control mb-2" placeholder="Desired Start Date" />
-                <input type="date" id="desiredDateTo" class="form-control mb-2" placeholder="Desired End Date" />
-                <button class="btn btn-primary" onclick="submitWishlist()">Add</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            <div id="addForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5>Add Trip to Wishlist</h5>
+                        <select id="tripSelector" class="form-control mb-2"></select>
+                        <input type="date" id="desiredDateFrom" class="form-control mb-2" placeholder="Desired Start Date" />
+                        <input type="date" id="desiredDateTo" class="form-control mb-2" placeholder="Desired End Date" />
+                        <button class="btn btn-primary" onclick="submitWishlist()">Add</button>
+                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -57,6 +62,7 @@
                     tbody.innerHTML += `
                         <tr>
                             <td>${item.tripName}</td>
+                            <td>${item.tripDescription}</td>
                             <td>${item.desiredDateFrom?.split('T')[0]}</td>
                             <td>${item.desiredDateTo?.split('T')[0]}</td>
                             <td>${item.tripPrice.toFixed(2)}</td>

@@ -21,3 +21,21 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }, 3000); // in ms
     });
 });
+
+
+window.addEventListener("resize", () => {
+    let newSize;
+
+    if (window.innerHeight < 400) {
+        newSize = 1;
+    } else if (window.innerHeight < 600) {
+        newSize = 2;
+    } else {
+        newSize = 3;
+    }
+
+    if (newSize !== pageSize) {
+        pageSize = newSize;
+        loadTrips(currentPage);
+    }Add commentMore actions
+});

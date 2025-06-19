@@ -80,8 +80,8 @@ namespace Travel.Web.Controllers
         {
             Console.WriteLine("Logout executed");
 
-            //HttpContext.Session.Remove("JWToken");
-            //HttpContext.Session.Clear();
+            HttpContext.Session.Remove("JWToken");
+            HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");
         }
 

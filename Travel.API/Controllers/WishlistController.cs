@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Dtos;
 using Travel.API.Models;
+using System.Diagnostics;
 
 namespace Travel.API.Controllers
 {
@@ -30,6 +31,7 @@ namespace Travel.API.Controllers
                     Id = w.Id,
                     TripId = w.TripId,
                     TripName = w.Trip.Name,
+                    TripDescription = w.Trip.Description,
                     TripPrice = w.Trip.Price,
                     DesiredDateFrom = w.DesiredDateFrom,
                     DesiredDateTo = w.DesiredDateTo,
@@ -96,12 +98,14 @@ namespace Travel.API.Controllers
                 .Include(w => w.Trip)
                 .FirstOrDefaultAsync(w => w.Id == wishlist.Id);
 
+            Debug.WriteLine($"full wishilist ");
             // Return DTO with Trip info
             var result = new WishlistReadDto
             {
                 Id = fullWishlist.Id,
                 TripId = fullWishlist.TripId,
                 TripName = fullWishlist.Trip?.Name,
+                TripDescription = fullWishlist.Trip?.Description,
                 TripPrice = fullWishlist.Trip?.Price ?? 0,
                 DesiredDateFrom = fullWishlist.DesiredDateFrom,
                 DesiredDateTo = fullWishlist.DesiredDateTo,
