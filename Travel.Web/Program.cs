@@ -21,12 +21,6 @@ builder.Services.AddAuthentication("Bearer")
     {
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
-            /*
-            ValidateIssuer = false, // change to true in production and configure issuer
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = false, // set to true and provide key if validating
-            */
 
             ValidateIssuer = true,
             ValidIssuer = "TravelApi",
@@ -41,27 +35,6 @@ builder.Services.AddAuthentication("Bearer")
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.AuthorizeFolder("/");
-    options.Conventions.AllowAnonymousToPage("/Login");
-    options.Conventions.AllowAnonymousToPage("/Register");
-
-});
-
-builder.Services.Configure<JwtBearerOptions>("Bearer", options =>
-{
-    options.Events = new JwtBearerEvents
-    {
-        OnChallenge = context =>
-        {
-            context.HandleResponse(); // suppress default 401
-
-            context.Response.Redirect("/Login");
-            return Task.CompletedTask;
-        }
-    };
-});
 
 
 var app = builder.Build();
@@ -82,10 +55,38 @@ app.UseSession();
 
 app.UseRouting();
 
+// checks if jwt token exists
+// if it is null it redirects to Login page
+app.Use(async (context, next) =>
+{
+    var token = context.Session.GetString("JWToken");
+
+    if (string.IsNullOrEmpty(token))
+    {
+        Console.WriteLine("programm: JWToken is missing — redirecting to /Account/Login");
+
+        var path = context.Request.Path.Value?.ToLower();
+        var isHtmlPage = path != null && !path.StartsWith("/api") && path.EndsWith(".cshtml") == false;
+
+        if (isHtmlPage && !path.Contains("/account/login"))
+        {
+            context.Response.Redirect("/Account/Login");
+            return; // Stop further processing
+        }
+    }
+    else
+    {
+        Console.WriteLine($"programm: JWToken = {token}");
+        context.Request.Headers["Authorization"] = $"Bearer {token}";
+    }
+
+    await next();
+});
+
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",
