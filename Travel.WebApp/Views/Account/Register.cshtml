@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+@if (TempData["Error"] != null)
+{
+    <script>
+        alert('@TempData["Error"]');
+    </script>
+}
+
+<div class="loginRegisterBackground">
+    <h2 class="text-center my-4">Register</h2>
+    <div class="container d-flex justify-content-center">
+        <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+            <form method="post" asp-action="Register">
+                <div>
+                    <label>Username</label>
+                    <input type="text" name="UserName" class="form-control" />
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="Email" class="form-control" />
+                </div>
+                <div>
+                    <label>First Name</label>
+                    <input type="text" name="FirstName" class="form-control" />
+                </div>
+                <div>
+                    <label>Last Name</label>
+                    <input type="text" name="LastName" class="form-control" />
+                </div>
+                <div>
+                    <label>Phone Number</label>
+                    <input type="text" name="PhoneNumber" class="form-control" />
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" name="Password" class="form-control" />
+                </div>
+                <div class="form-check mb-3">
+      
+                    <input type="checkbox" name="IsAdmin" value="true" class="form-check-input" id="isAdminCheckbox" />
+                    <input type="hidden" name="IsAdmin" value="false" />
+                    <label class="form-check-label" for="isAdminCheckbox">Is Admin</label>
+                </div>
+                <button type="submit" class="btn btn-success mt-2">Register</button>
+            </form>
+        </div>
+    </div>
+</div>

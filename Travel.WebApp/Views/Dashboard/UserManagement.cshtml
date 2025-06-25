@@ -1,0 +1,169 @@
+﻿﻿@{
+    ViewData["Title"] = "User Management";
+    var sectionTitle = ViewData["SectionTitle"] ?? "Manage Users";
+    var token = Context.Session.GetString("JWToken");
+}
+
+<div class="landing-page">
+    <div class="overlay"></div>
+
+    <div class="container dashboard-content">
+        <div class="dashboard-card">
+            <button class="btn btn-success mb-3" onclick="showAddForm()">+ Add User</button>
+
+            <div class="table-responsive">
+                <div class="table-scroll-wrapper">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th class="d-none d-sm-table-cell">Email</th>
+                                <th class="d-none d-md-table-cell">First Name</th>
+                                <th class="d-none d-md-table-cell">Last Name</th>
+                                <th class="d-none d-lg-table-cell">Phone</th>
+                                <th class="d-none d-lg-table-cell">Admin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="addEditForm" class="modal" style="display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5 id="formTitle">Add User</h5>
+                        <input type="hidden" id="userId" />
+                        <input type="text" id="userName" placeholder="Username" class="form-control mb-2" />
+                        <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
+                        <input type="password" id="password" placeholder="Password" class="form-control mb-2" />
+                        <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
+                        <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
+                        <input type="text" id="phoneNumber" placeholder="Phone Number" class="form-control mb-2" />
+                        <div class="form-check mb-2 text-start">
+                            <input type="checkbox" id="isAdmin" class="form-check-input" />
+                            <label class="form-check-label" for="isAdmin">Is Admin</label>
+                        </div>
+                        <button class="btn btn-primary" onclick="submitForm()">Save</button>
+                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    </<div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+
+        function loadUsers() {
+            fetch("https://localhost:7172/api/applicationuser", {
+                headers: { "Authorization": "Bearer " + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById("userTableBody");
+                tbody.innerHTML = "";
+                data.forEach(user => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${user.userName}</td>
+                            <td>${user.email}</td>
+                            <td>${user.firstName ?? ""}</td>
+                            <td>${user.lastName ?? ""}</td>
+                            <td>${user.phoneNumber ?? ""}</td>
+                            <td>${user.isAdmin ? "Yes" : "No"}</td>
+                            <td class="user-actions">
+                                <button class="btn btn-sm btn-warning" onclick="editUser(${user.id}, '${user.email}', '${user.firstName ?? ""}', '${user.lastName ?? ""}', '${user.phoneNumber ?? ""}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button>
+                            </td>
+                        </tr>`;
+                });
+            });
+        }
+
+        function showAddForm() {
+            document.getElementById("addEditForm").style.display = "block";
+            document.getElementById("formTitle").innerText = "Add User";
+            ["userId", "userName", "email", "password", "firstName", "lastName", "phoneNumber"].forEach(id => document.getElementById(id).value = "");
+            document.getElementById("isAdmin").checked = false;
+        }
+
+        function editUser(id, email, firstName, lastName, phoneNumber) {
+            document.getElementById("addEditForm").style.display = "block";
+            document.getElementById("formTitle").innerText = "Edit User";
+            document.getElementById("userId").value = id;
+            document.getElementById("email").value = email;
+            document.getElementById("firstName").value = firstName;
+            document.getElementById("lastName").value = lastName;
+            document.getElementById("phoneNumber").value = phoneNumber;
+        }
+
+        function hideForm() {
+            document.getElementById("addEditForm").style.display = "none";
+        }
+
+        function submitForm() {
+            const idValue = document.getElementById("userId").value;
+            const id = parseInt(idValue);
+            const isEdit = !!idValue;
+
+            const user = {
+                email: document.getElementById("email").value,
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                phoneNumber: document.getElementById("phoneNumber").value
+            };
+
+            const url = isEdit
+                ? `https://localhost:7172/api/applicationuser/${id}`
+                : `https://localhost:7172/api/applicationuser`;
+
+            const method = isEdit ? "PUT" : "POST";
+
+            if (!isEdit) {
+                user.userName = document.getElementById("userName").value;
+                user.password = document.getElementById("password").value;
+                user.isAdmin = document.getElementById("isAdmin").checked;
+            }
+
+            fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify(user)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        console.error("API error:", err);
+                        alert("User already exist.");
+                    });
+                }
+                loadUsers();
+                hideForm();
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                alert("Something went wrong.");
+            });
+        }
+
+        function deleteUser(id) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                fetch(`https://localhost:7172/api/applicationuser/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }).then(() => loadUsers());
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadUsers);
+    </script>
+}

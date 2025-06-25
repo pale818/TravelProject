@@ -1,0 +1,51 @@
+﻿﻿@{
+    ViewData["Title"] = "Dashboard";
+    var isAdmin = (ViewBag.IsAdmin as bool?) ?? false;
+}
+
+@section Scripts {
+    <script>
+        const token = '@TempData["JwtToken"]';
+        if (token && token !== 'null' && token !== '') {
+            localStorage.setItem("jwtToken", token);
+        }
+    </script>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
+<!--   BODY OF FASHBOARD page and for this page it is responsible Controllers/DashboardConreoller.cs -->
+<div class="landing-page">
+    <div class="overlay"></div>
+
+    <div class="dashboard-content">
+        <h2>Travel Agency</h2>
+
+        <div class="container d-flex justify-content-center">
+            <div class="dashboard-card-main" style="width: 100%; max-width: 500px;">
+                <ul class="list-group">
+                    @if (isAdmin)
+                    {
+                        <li class="list-group-item"><a href="/Dashboard/UserManagement" class="text-decoration-none">User Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/TripManagement" class="text-decoration-none">Trip Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/GuideManagement" class="text-decoration-none">Guide Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/TripGuideManagement" class="text-decoration-none">Trip and Guide Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/DestinationManagement" class="text-decoration-none">Destination Management</a></li>
+                        <li class="list-group-item"><a href="/Dashboard/WishlistManagementAdmin" class="text-decoration-none">Wishlist Management</a></li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item"><a href="/Dashboard/WishlistManagement">WishList Management</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

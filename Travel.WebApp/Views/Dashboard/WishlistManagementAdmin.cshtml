@@ -1,0 +1,85 @@
+﻿﻿@{
+    ViewData["Title"] = "Wishlist Management";
+    var sectionTitle = ViewData["SectionTitle"] ?? "Manage Wishlist";
+    var token = Context.Session.GetString("JWToken");
+}
+
+<div class="landing-page">
+    <div class="overlay"></div>
+
+    <div class="container dashboard-content">
+        <div class="dashboard-card">
+
+            <div class="table-responsive">
+                <div class="table-scroll-wrapper">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Trip Name</th>
+                                <th>Trip Description</th>
+                                <th>Date From</th>
+                                <th>Date To</th>
+                                <th>Price</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wishlistTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+
+        function loadWishlist() {
+            fetch("https://localhost:7172/api/wishlist/admin", {
+                headers: { "Authorization": "Bearer " + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById("wishlistTableBody");
+                tbody.innerHTML = "";
+                data.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.tripName}</td>
+                            <td>${item.tripDescription}</td>
+                            <td>${item.desiredDateFrom?.split('T')[0]}</td>
+                            <td>${item.desiredDateTo?.split('T')[0]}</td>
+                            <td>${item.tripPrice.toFixed(2)}</td>
+                            <td>${item.user}</td>
+                        </tr>`;
+                });
+            });
+        }
+
+        function loadTrips() {
+            fetch("https://localhost:7172/api/trip", {
+                headers: { "Authorization": "Bearer " + token }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const selector = document.getElementById("tripSelector");
+                selector.innerHTML = data.map(trip => `<option value="${trip.id}">${trip.name}</option>`).join("");
+            });
+        }
+
+        function showAddForm() {
+            document.getElementById("addForm").style.display = "block";
+            loadTrips();
+        }
+
+        function hideForm() {
+            document.getElementById("addForm").style.display = "none";
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", loadWishlist);
+    </script>
+}
