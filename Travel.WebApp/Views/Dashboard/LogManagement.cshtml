@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Log Viewer";
+    var token = Context.Session.GetString("JWToken");
+}
+
+
+
+<div class="landing-page">
+    <div class="overlay"></div>
+
+    <div class="container dashboard-content">
+        <div class="dashboard-card">
+            <button class="btn btn-info" onclick="showLogInputForm()">Number of Logs</button>
+
+            <div class="table-responsive" id="logTableContainer">
+                <div class="table-scroll-wrapper">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="logInputModal" class="modal" style=" display:none;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <h5>View Last N Logs</h5>
+                        <input type="number" id="logCount" class="form-control mb-2" placeholder="Enter number of logs" min="1" />
+                        <button class="btn btn-primary" onclick="fetchLogs()">Get Logs</button>
+                        <button class="btn btn-secondary" onclick="hideLogInputForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        const token = localStorage.getItem("jwtToken");
+
+        function showLogInputForm() {
+            document.getElementById("logInputModal").style.display = "block";
+        }
+
+        function hideLogInputForm() {
+            document.getElementById("logInputModal").style.display = "none";
+        }
+
+        function fetchLogs() {
+            const n = parseInt(document.getElementById("logCount").value);
+            if (!n || n <= 0) {
+                alert("Please enter a valid number of logs.");
+                return;
+            }
+
+            fetch(`https://localhost:7172/api/log/get/${n}`, {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to fetch logs.");
+                return res.json();
+            })
+            .then(data => {
+                const tbody = document.getElementById("logTableBody");
+                tbody.innerHTML = "";
+
+                data.forEach(log => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${log.action}</td>
+                            <td>${log.entity}</td>
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        </tr>`;
+                });
+
+                document.getElementById("logTableContainer").style.display = "block";
+                hideLogInputForm();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to load logs.");
+            });
+        }
+    </script>
+}

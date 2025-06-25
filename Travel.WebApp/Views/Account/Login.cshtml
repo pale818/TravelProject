@@ -1,4 +1,6 @@
-﻿﻿@{
+﻿@model LoginRequest
+
+@{
     ViewData["Title"] = "Login";
     var isLoggedIn = Context.Session.GetString("JWToken") != null;
 }
@@ -21,22 +23,24 @@
     <h2 class="text-center my-4">Login</h2>
     <div class="container d-flex justify-content-center">
         <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
-
-            <!-- MAKES POST req to /Account/Login because Login.cshtml is inside Account folder .Net rule -->
-            <!-- ASP.NET Core infers the controller based on the current view’s folder name if you don’t explicitly specify  -->
-            <!-- So AccountController is responsible to receive POST /Account/Login request  -->
+            <!-- POSTs to AccountController.Login() -->
             <form method="post" asp-action="Login">
-
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="UserName" class="form-control" />
+                    <label asp-for="UserName" class="form-label"></label>
+                    <input asp-for="UserName" class="form-control" />
+                    <span asp-validation-for="UserName" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="Password" class="form-control" />
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

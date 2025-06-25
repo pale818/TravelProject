@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Models;
 using Travel.API.Dtos;
+using Travel.API.Services;
 using System;
 
 namespace Travel.API.Controllers
@@ -28,10 +29,13 @@ namespace Travel.API.Controllers
     public class TripController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILoggingService _logger;
 
-        public TripController(ApplicationDbContext context)
+
+        public TripController(ApplicationDbContext context, ILoggingService logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 
@@ -120,7 +124,7 @@ namespace Travel.API.Controllers
             await _context.SaveChangesAsync();
 
             // logging
-            await LogAction("Create", "Trip", trip.Id);
+            await _logger.LogAction(HttpContext, "Create", "Trip", trip.Id);
 
 
             return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, trip);
@@ -165,7 +169,7 @@ namespace Travel.API.Controllers
             }
 
             // logging
-            await LogAction("Update", "Trip", trip.Id);
+            await _logger.LogAction(HttpContext, "Update", "Trip", trip.Id);
 
 
             return NoContent();
@@ -184,6 +188,7 @@ namespace Travel.API.Controllers
 	     •	If found, deletes and returns 204 No Content
          */
         // DELETE: api/trip/{id}
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTrip(int id)
         {
@@ -223,7 +228,8 @@ namespace Travel.API.Controllers
                 await transaction.CommitAsync();
 
                 // Log the deletion
-                await LogAction("Delete", "Trip", trip.Id);
+                await _logger.LogAction(HttpContext, "Delete", "Trip", trip.Id);
+
 
                 return NoContent();
             }
@@ -329,27 +335,6 @@ namespace Travel.API.Controllers
             return NoContent();
         }
 
-
-
-        // FOR LOGGING TRIPS
-        private async Task LogAction(string action, string entity, int entityId)
-        {
-            var userIdClaim = User.FindFirst("userId")?.Value;
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return; // skip logging if userId not found
-
-            var log = new Log
-            {
-                UserId = userId,
-                Action = action,
-                Entity = entity,
-                EntityId = entityId,
-                Timestamp = DateTime.Now
-            };
-
-            _context.Logs.Add(log);
-            await _context.SaveChangesAsync();
-        }
 
 
     }

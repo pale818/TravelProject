@@ -1,4 +1,5 @@
-﻿﻿@{
+﻿@model Travel.Web.Models.UpdateUser
+@{
     ViewData["Title"] = "User Profile";
 }
 
@@ -6,45 +7,47 @@
 
 <div class="container d-flex justify-content-center align-items-start">
     <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
-        <form id="profileForm">
-            <input type="hidden" id="Id" />
+        <form asp-action="UpdateProfile" method="post" id="profileForm">
+            <input type="hidden" asp-for="Id" />
 
             <div class="mb-3">
-                <label for="UserName" class="form-label">Username:</label>
-                <input type="text" id="userName" class="form-control" disabled />
-            </div>
-            <div class="mb-3">
-                <label for="Email" class="form-label">Email:</label>
-                <input type="email" id="email" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="FirstName" class="form-label">First Name:</label>
-                <input type="text" id="firstName" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="LastName" class="form-label">Last Name:</label>
-                <input type="text" id="lastName" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="PhoneNumber" class="form-label">Phone Number:</label>
-                <input type="text" id="phoneNumber" class="form-control" />
+                <label asp-for="UserName" class="form-label"></label>
+                <input asp-for="UserName" class="form-control" disabled />
+                <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
 
-            <button type="button" class="btn btn-success w-100" onclick="saveProfile()">Save</button>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Save</button>
         </form>
     </div>
 </div>
 
-
-
-
-
-
-
-
-
-
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
         const token = localStorage.getItem("jwtToken");
         console.log("Token from localStorage:", token);

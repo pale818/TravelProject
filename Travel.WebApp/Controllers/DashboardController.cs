@@ -41,5 +41,10 @@ namespace Travel.Web.Controllers
         {
             return View();
         }
+
+        public IActionResult LogManagement()
+        {
+            return View();
+        }
     }
 }
