@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Models;
+using Travel.WebAPI.Dtos;
 
 // This file (ApplicationDbContext.cs) defines your EF Core database context, which is the central bridge between:
 // C# models (Trip, Destination, etc.)

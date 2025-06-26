@@ -1,25 +1,12 @@
 ﻿using Travel.API.Data;
 using Travel.API.Models;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace Travel.API.Services
 {
-    public interface ILoggingService
+    public static class LoggingService
     {
-        Task LogAction(HttpContext httpContext, string action, string entity, int entityId);
-    }
-
-    public class LoggingService : ILoggingService
-    {
-        private readonly ApplicationDbContext _context;
-
-        public LoggingService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task LogAction(HttpContext httpContext, string action, string entity, int entityId)
+        public static async Task LogAction(ApplicationDbContext context, HttpContext httpContext, string action, string entity, int entityId)
         {
             var userIdClaim = httpContext.User.FindFirst("userId")?.Value;
             if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
@@ -34,8 +21,8 @@ namespace Travel.API.Services
                 Timestamp = DateTime.Now
             };
 
-            _context.Logs.Add(log);
-            await _context.SaveChangesAsync();
+            context.Logs.Add(log);
+            await context.SaveChangesAsync();
         }
     }
 }

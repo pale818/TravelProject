@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Dtos;
 using Travel.API.Models;
+using Travel.API.Services;
 
 namespace Travel.API.Controllers
 {
@@ -51,10 +52,14 @@ namespace Travel.API.Controllers
 
             _context.Guides.Add(guide);
             await _context.SaveChangesAsync();
+
+            // logging
+            await LoggingService.LogAction(_context, HttpContext, "Create", "Guide", guide.Id);
+
             return CreatedAtAction(nameof(GetGuide), new { id = guide.Id }, guide);
         }
 
-        // PUT: api/guide/{id}
+        // PUT: api/guide/{id}, update guide info
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGuide(int id, Guide guide)
         {
@@ -68,6 +73,8 @@ namespace Travel.API.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                // logging
+                await LoggingService.LogAction(_context, HttpContext, "Update", "Guide", guide.Id);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -85,19 +92,42 @@ namespace Travel.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGuide(int id)
         {
-            var guide = await _context.Guides.FindAsync(id);
-            if (guide == null)
-            {
-                return NotFound();
-            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            _context.Guides.Remove(guide);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                var guide = await _context.Guides.FindAsync(id);
+                if (guide == null)
+                {
+                    return NotFound();
+                }
+
+                var tripGuides = await _context.Set<Dictionary<string, object>>("TripGuide")
+                    .Where(tg => (int)tg["GuideId"] == id)
+                    .ToListAsync();
+
+                System.Diagnostics.Debug.WriteLine($"tripGuides: {tripGuides}");
+
+                _context.RemoveRange(tripGuides);
+                _context.Guides.Remove(guide);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // logging
+                await LoggingService.LogAction(_context, HttpContext, "Delete", "Guide", guide.Id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Error deleting guide and related data: {e.Message}");
+            }
+         
         }
 
 
-        // delete guides form some trip
+        //adding guide/s to trips
         [HttpPut("{id}/guides")]
         public async Task<IActionResult> UpdateTripGuides(int id, [FromBody] TripGuideUpdate dto)
         {

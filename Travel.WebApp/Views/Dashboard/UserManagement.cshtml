@@ -35,9 +35,7 @@
                     <div class="modal-content">
                         <h5 id="formTitle">Add User</h5>
                         <input type="hidden" id="userId" />
-                        <input type="text" id="userName" placeholder="Username" class="form-control mb-2" />
                         <input type="email" id="email" placeholder="Email" class="form-control mb-2" />
-                        <input type="password" id="password" placeholder="Password" class="form-control mb-2" />
                         <input type="text" id="firstName" placeholder="First Name" class="form-control mb-2" />
                         <input type="text" id="lastName" placeholder="Last Name" class="form-control mb-2" />
                         <input type="text" id="phoneNumber" placeholder="Phone Number" class="form-control mb-2" />
@@ -123,11 +121,12 @@
 
             const method = isEdit ? "PUT" : "POST";
 
+            /*
             if (!isEdit) {
                 user.userName = document.getElementById("userName").value;
                 user.password = document.getElementById("password").value;
                 user.isAdmin = document.getElementById("isAdmin").checked;
-            }
+            }*/
 
             fetch(url, {
                 method,

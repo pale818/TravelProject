@@ -6,6 +6,9 @@ using Travel.API.Dtos;
 using Travel.API.Models;
 using System.Diagnostics;
 using Travel.WebAPI.Dtos;
+using System;
+using Travel.API.Services;
+using Humanizer;
 
 namespace Travel.API.Controllers
 {
@@ -136,6 +139,9 @@ namespace Travel.API.Controllers
                 CreatedAt = fullWishlist.CreatedAt
             };
 
+            // logging
+            await LoggingService.LogAction(_context, HttpContext, "Create", "Wishlist", dto.TripId);
+
             return CreatedAtAction(nameof(GetWishlist), new { id = result.Id }, result);
         }
 
@@ -161,6 +167,9 @@ namespace Travel.API.Controllers
 
             _context.Wishlists.Remove(wishlist);
             await _context.SaveChangesAsync();
+
+            // logging
+            await LoggingService.LogAction(_context, HttpContext, "Delete", "Wishlist", id);
 
             return NoContent();
         }

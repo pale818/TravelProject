@@ -29,13 +29,11 @@ namespace Travel.API.Controllers
     public class TripController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILoggingService _logger;
 
 
-        public TripController(ApplicationDbContext context, ILoggingService logger)
+        public TripController(ApplicationDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
 
@@ -124,7 +122,7 @@ namespace Travel.API.Controllers
             await _context.SaveChangesAsync();
 
             // logging
-            await _logger.LogAction(HttpContext, "Create", "Trip", trip.Id);
+            await LoggingService.LogAction(_context, HttpContext, "Create", "Trip", trip.Id);
 
 
             return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, trip);
@@ -169,7 +167,7 @@ namespace Travel.API.Controllers
             }
 
             // logging
-            await _logger.LogAction(HttpContext, "Update", "Trip", trip.Id);
+            await LoggingService.LogAction(_context, HttpContext, "Update", "Trip", trip.Id);
 
 
             return NoContent();
@@ -228,7 +226,7 @@ namespace Travel.API.Controllers
                 await transaction.CommitAsync();
 
                 // Log the deletion
-                await _logger.LogAction(HttpContext, "Delete", "Trip", trip.Id);
+                await LoggingService.LogAction(_context, HttpContext, "Delete", "Trip", trip.Id);
 
 
                 return NoContent();

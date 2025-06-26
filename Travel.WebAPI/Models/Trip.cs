@@ -9,13 +9,12 @@ namespace Travel.API.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Trip name is required")]
-        [StringLength(100, ErrorMessage = "Trip name cannot be longer than 100 characters")]
+        //[Required(ErrorMessage = "Trip name is required")]
+        //[StringLength(100, ErrorMessage = "Trip name cannot be longer than 100 characters")]
         public string Name { get; set; }
-
         public string? Description { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
+        //[Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
         public decimal Price { get; set; }
 
         // part responsible for the bridge table between Trip and Guide

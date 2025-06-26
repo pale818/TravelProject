@@ -31,6 +31,11 @@ namespace Travel.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(ApplicationUser model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             var response = await _httpClient.PostAsJsonAsync("api/auth/register", model);
             Console.WriteLine($"REGISTER RESPONSE: {response.Content}");
             Console.WriteLine($"REGISTER IsSuccessStatusCode: {response.IsSuccessStatusCode}");
@@ -49,6 +54,11 @@ namespace Travel.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginRequest model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model); 
+            }
+
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", model);
 
             if (response.IsSuccessStatusCode)

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Models;
+using Travel.API.Services;
 
 namespace Travel.API.Controllers
 {
@@ -51,6 +52,10 @@ namespace Travel.API.Controllers
 
             _context.Destinations.Add(destination);
             await _context.SaveChangesAsync();
+
+            // logging
+            await LoggingService.LogAction(_context, HttpContext, "Create", "Destination", destination.Id);
+
             return CreatedAtAction(nameof(GetDestination), new { id = destination.Id }, destination);
         }
 
@@ -73,6 +78,8 @@ namespace Travel.API.Controllers
                 throw;
             }
 
+            // logging
+            await LoggingService.LogAction(_context, HttpContext, "Update", "Destination", destination.Id);
             return NoContent();
         }
 
@@ -80,13 +87,43 @@ namespace Travel.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDestination(int id)
         {
-            var destination = await _context.Destinations.FindAsync(id);
+            /*var destination = await _context.Destinations.FindAsync(id);
             if (destination == null) return NotFound();
 
             _context.Destinations.Remove(destination);
             await _context.SaveChangesAsync();
 
             return NoContent();
+            */
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var destination = await _context.Destinations.FindAsync(id);
+                if (destination == null)
+                {
+                    return NotFound();
+                }
+
+                var tripDestinations = await _context.Set<Dictionary<string, object>>("TripDestination")
+                   .Where(td => (int)td["DestinationId"] == id)
+                   .ToListAsync();
+                _context.RemoveRange(tripDestinations);
+                _context.Destinations.Remove(destination);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // logging
+                await LoggingService.LogAction(_context, HttpContext, "Delete", "Destination", destination.Id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Error deleting destination and related data: {e.Message}");
+            }
         }
     }
 }

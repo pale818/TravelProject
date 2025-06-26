@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Travel.Web.Models.ApplicationUser
+
+@{
     ViewData["Title"] = "Register";
 }
 @if (TempData["Error"] != null)
@@ -9,42 +11,50 @@
 }
 
 <div class="loginRegisterBackground">
-    <h2 class="text-center my-4">Register</h2>
     <div class="container d-flex justify-content-center">
-        <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <div class="card shadow p-3" style="width: 100%; max-width: 400px;">
             <form method="post" asp-action="Register">
-                <div>
-                    <label>Username</label>
-                    <input type="text" name="UserName" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="UserName" class="form-label small"></label>
+                    <input asp-for="UserName" class="form-control form-control-sm" />
+                    <span asp-validation-for="UserName" class="text-danger small"></span>
                 </div>
-                <div>
-                    <label>Email</label>
-                    <input type="email" name="Email" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="Email" class="form-label small"></label>
+                    <input asp-for="Email" class="form-control form-control-sm" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
-                <div>
-                    <label>First Name</label>
-                    <input type="text" name="FirstName" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="FirstName" class="form-label small"></label>
+                    <input asp-for="FirstName" class="form-control form-control-sm" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
-                <div>
-                    <label>Last Name</label>
-                    <input type="text" name="LastName" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="LastName" class="form-label small"></label>
+                    <input asp-for="LastName" class="form-control form-control-sm" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
-                <div>
-                    <label>Phone Number</label>
-                    <input type="text" name="PhoneNumber" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="PhoneNumber" class="form-label small"></label>
+                    <input asp-for="PhoneNumber" class="form-control form-control-sm" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
                 </div>
-                <div>
-                    <label>Password</label>
-                    <input type="password" name="Password" class="form-control" />
+                <div class="mb-2">
+                    <label asp-for="Password" class="form-label small"></label>
+                    <input asp-for="Password" class="form-control form-control-sm" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
-                <div class="form-check mb-3">
-      
-                    <input type="checkbox" name="IsAdmin" value="true" class="form-check-input" id="isAdminCheckbox" />
-                    <input type="hidden" name="IsAdmin" value="false" />
-                    <label class="form-check-label" for="isAdminCheckbox">Is Admin</label>
+                <div class="form-check mb-2">
+                    <input asp-for="IsAdmin" class="form-check-input" id="isAdminCheckbox" />
+                    <label asp-for="IsAdmin" class="form-check-label small"></label>
                 </div>
-                <button type="submit" class="btn btn-success mt-2">Register</button>
+                <button type="submit" class="btn btn-success btn-sm w-100 mt-2">Register</button>
             </form>
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
