@@ -200,16 +200,28 @@
             const method = isEdit ? "PUT" : "POST";
             const url = isEdit ? `https://localhost:7172/api/trip/${trip.id}` : "https://localhost:7172/api/trip";
 
-            await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token
-                },
-                body: JSON.stringify(trip)
-            });
-            loadTrips(currentPage);
-            hideForm();
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(trip)
+                });
+
+
+                if (!response.ok) {
+                    const errorText = await response.text(); 
+                    alert("Failed to create trip");
+                    return;
+                }
+
+                loadTrips(currentPage);
+                hideForm();
+            } catch (error) {
+                    alert("An error occurred: " + error.message);
+            }
         }
 
         // Sends a DELETE request to remove a trip by ID.
@@ -226,7 +238,7 @@
 
                     if (!response.ok) {
                         const errorText = await response.text(); // or .json() if it's JSON
-                        alert("Failed to delete trip, probably is linked to some wishlist");
+                        alert("Failed to delete trip, probably is linked to some data");
                         return;
                     }
 
