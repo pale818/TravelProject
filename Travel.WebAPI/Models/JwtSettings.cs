@@ -1,5 +1,7 @@
 ﻿namespace Travel.API.Models
 {
+
+    //for generating jwt
     public class JwtSettings
     {
         public string Key { get; set; } = string.Empty;

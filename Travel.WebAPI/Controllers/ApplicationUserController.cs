@@ -130,6 +130,7 @@ namespace Travel.API.Controllers
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
             user.PhoneNumber = request.PhoneNumber;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             await _context.SaveChangesAsync();
             return NoContent();

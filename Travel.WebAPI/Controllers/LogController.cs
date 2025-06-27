@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
 using Travel.API.Models;
 
-namespace Travel.API.Controllers
+namespace Travel.WebAPI.Controllers
 {
     // secure authorization, use JWT
     [Authorize]

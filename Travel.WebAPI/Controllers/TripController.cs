@@ -1,8 +1,4 @@
-﻿/*
- * Trip controller
- */
-
-// Gives access to MVC features, especially [ApiController], ControllerBase, and ActionResult.
+﻿// Gives access to MVC features, especially [ApiController], ControllerBase, and ActionResult.
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // Required for ToListAsync() and other EF Core async database methods.
@@ -12,8 +8,10 @@ using Travel.API.Models;
 using Travel.API.Dtos;
 using Travel.API.Services;
 using System;
+using System.Collections.Generic;
 
-namespace Travel.API.Controllers
+
+namespace Travel.WebAPI.Controllers
 {
     // authorize with JWT
     [Authorize]
@@ -55,10 +53,7 @@ namespace Travel.API.Controllers
          */
         public async Task<ActionResult<IEnumerable<Trip>>> GetTripsGuides()
         {
-            // await _context.Trips.ToListAsync(); - Uses Entity Framework Core to asynchronously fetch all records from the Trips table.
-            // Returns the list of trips as JSON.
-            //return await _context.Trips.ToListAsync();
-
+          
             var trips = await _context.Trips
                 .Include(t => t.Guides)
                 .ToListAsync();
@@ -78,16 +73,7 @@ namespace Travel.API.Controllers
             return Ok(result);
         }
 
-        /*
-         * When you make a GET request to:
-         * https://localhost:port/api/trip
-         * It will:
-	     • Query the Trips table from your database
-	     • Return the data as JSON
-	     • Show it in Swagger (or allow use by frontend like JavaScript)
-         */
-
-
+  
 
         // **********************************************************
         // GET: api/trip/{id}
@@ -129,16 +115,7 @@ namespace Travel.API.Controllers
         }
 
 
-        // **********************************************************
-        /*	•	Verifies the id in URL matches trip.Id from body
-	    •	Marks the trip as modified
-	    •	Handles update conflicts
-	    •	Returns:
-	    •	204 No Content if successful
-	    •	404 if the trip doesn’t exist
-	    •	400 if ID mismatch
-        * 
-        */
+      
         // PUT: api/trip/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTrip(int id, Trip trip)
@@ -255,20 +232,30 @@ namespace Travel.API.Controllers
 
 
 
-        // FOR PAGINATION
+        // FOR PAGINATION and FILTERING
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Trip>>> SearchTrips(
             [FromQuery] string? query = null,
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] List<int>? destinationIds = null)
         {
             if (page < 1 || pageSize < 1) return BadRequest("Invalid paging parameters.");
 
+            // Start with a query that includes the Destinations navigation property
             var tripQuery = _context.Trips.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(query))
             {
                 tripQuery = tripQuery.Where(t => t.Name.Contains(query) || (t.Description != null && t.Description.Contains(query)));
+            }
+
+            // NEW: Filter by selected destinations
+            if (destinationIds != null && destinationIds.Any())
+            {
+                // This will generate a JOIN and a WHERE clause in the SQL query
+                // It checks if the trip has at least one destination whose ID is in the provided list.
+                tripQuery = tripQuery.Where(t => t.Destinations.Any(d => destinationIds.Contains(d.Id)));
             }
 
             var totalCount = await tripQuery.CountAsync();
@@ -277,7 +264,6 @@ namespace Travel.API.Controllers
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
 
             var response = new
             {
