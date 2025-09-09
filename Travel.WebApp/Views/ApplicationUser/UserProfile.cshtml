@@ -1,5 +1,6 @@
-﻿@model Travel.Web.Models.UpdateUser
-@{
+﻿@model Travel.Web.Models.ApplicationUser
+
+﻿@{
     ViewData["Title"] = "User Profile";
 }
 
@@ -7,43 +8,49 @@
 
 <div class="container d-flex justify-content-center align-items-start">
     <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
-        <form asp-action="UpdateProfile" method="post" id="profileForm">
-            <input type="hidden" asp-for="Id" />
+        <form id="profileForm">
+            <input type="hidden" id="Id" />
 
-            <div class="mb-3">
-                <label asp-for="UserName" class="form-label"></label>
-                <input asp-for="UserName" class="form-control" disabled />
-                <span asp-validation-for="UserName" class="text-danger"></span>
+            <div class="mb-2">
+                <label asp-for="UserName" class="form-label small"></label>
+                <input asp-for="UserName" class="form-control form-control-sm" disabled/>
+                <span asp-validation-for="UserName" class="text-danger small"></span>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+            <div class="mb-2">
+                <label asp-for="Email" class="form-label small"></label>
+                <input asp-for="Email" class="form-control form-control-sm" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="FirstName" class="form-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+            <div class="mb-2">
+                <label asp-for="FirstName" class="form-label small"></label>
+                <input asp-for="FirstName" class="form-control form-control-sm" />
+                <span asp-validation-for="FirstName" class="text-danger small"></span>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="LastName" class="form-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+            <div class="mb-2">
+                <label asp-for="LastName" class="form-label small"></label>
+                <input asp-for="LastName" class="form-control form-control-sm" />
+                <span asp-validation-for="LastName" class="text-danger small"></span>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            <div class="mb-2">
+                <label asp-for="PhoneNumber" class="form-label small"></label>
+                <input asp-for="PhoneNumber" class="form-control form-control-sm" />
+                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
             </div>
-
-            <button type="submit" class="btn btn-success w-100">Save</button>
+            <div class="mb-2">
+                <label asp-for="Password" class="form-label small"></label>
+                <input asp-for="Password" class="form-control form-control-sm" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+            <div class="form-check mb-2">
+                <input type="checkbox" name="IsAdmin" value="true" class="form-check-input" id="isAdminCheckbox" />
+                <input type="hidden" name="IsAdmin" value="false" />
+                <label class="form-check-label" for="isAdminCheckbox">Is Admin</label>
+            </div>
+            <button type="button" class="btn btn-success w-100" onclick="saveProfile()">Save</button>
         </form>
     </div>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -52,42 +59,101 @@
         const token = localStorage.getItem("jwtToken");
         console.log("Token from localStorage:", token);
 
-        function loadProfile() {
+         function loadProfile() {
             fetch("https://localhost:7172/api/ApplicationUser/me", {
                 method: "GET",
                 headers: { "Authorization": "Bearer " + token }
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
-                for (const key in data) {
-                    const input = document.getElementById(key);
-                    if (input) {
-                        input.value = data[key];
+                console.log("Fetched user data:", data);
+
+                // --- CORRECTED MAPPING ---
+                // Added the 'isAdmin' mapping to the object
+                const inputMappings = {
+                    'id': 'Id',
+                    'userName': 'UserName',
+                    'email': 'Email',
+                    'firstName': 'FirstName',
+                    'lastName': 'LastName',
+                    'phoneNumber': 'PhoneNumber',
+                    'isAdmin': 'isAdminCheckbox' // NEW: Mapping for the checkbox
+                };
+
+                for (const jsonKey in inputMappings) {
+                    const elementId = inputMappings[jsonKey];
+                    const input = document.getElementById(elementId);
+
+                    if (input && data.hasOwnProperty(jsonKey)) {
+                        // Special handling for checkboxes
+                        if (input.type === 'checkbox') {
+                            // The `checked` property expects a boolean (true/false)
+                            input.checked = data[jsonKey];
+                            console.log(`Mapped '${jsonKey}' to checkbox with ID '${elementId}' and set checked: '${data[jsonKey]}'`);
+                        } else {
+                            // Standard value setting for other inputs
+                            input.value = data[jsonKey];
+                            console.log(`Mapped '${jsonKey}' to input with ID '${elementId}' and set value: '${data[jsonKey]}'`);
+                        }
+                    } else {
+                        console.warn(`No input element found with ID '${elementId}' or key '${jsonKey}' missing in data.`);
                     }
                 }
+            })
+            .catch(error => {
+                console.error("Error fetching user profile:", error);
+                alert("Failed to load user profile. Please check the console for details.");
             });
         }
 
+
         function saveProfile() {
+            // Correcting the IDs to match the PascalCase generated by asp-for
             const updatedUser = {
-                email: document.getElementById("email").value,
-                firstName: document.getElementById("firstName").value,
-                lastName: document.getElementById("lastName").value,
-                phoneNumber: document.getElementById("phoneNumber").value
+                id: parseInt(document.getElementById("Id").value), // Don't forget the ID
+                userName: document.getElementById("UserName").value,
+                email: document.getElementById("Email").value,
+                firstName: document.getElementById("FirstName").value,
+                lastName: document.getElementById("LastName").value,
+                phoneNumber: document.getElementById("PhoneNumber").value,
+                password: document.getElementById("Password").value,
+                isAdmin: document.getElementById("isAdminCheckbox").checked
             };
 
-            fetch("https://localhost:7172/api/ApplicationUser/me", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token
-                },
-                body: JSON.stringify(updatedUser)
-            })
-            .then(res => {
-                if (res.ok) alert("Profile updated!");
-                else alert("Update failed!");
-            });
+            console.log("Sending updated user data:", updatedUser);
+
+            try {
+                fetch("https://localhost:7172/api/ApplicationUser/me", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(updatedUser)
+                })
+                .then(res => {
+                    if (res.ok) {
+                        alert("Profile updated successfully!");
+                    } else {
+                        res.text().then(text => {
+                            console.error("Update failed with response:", text);
+                            alert("Update failed! See console for details.");
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("An error occurred during the update:", error);
+                    alert("An unexpected error occurred. Please try again.");
+                });
+            } catch (e) {
+                console.error("Error creating updatedUser object:", e);
+                alert("Failed to prepare data for saving. Check console.");
+            }
         }
 
         document.addEventListener("DOMContentLoaded", loadProfile);

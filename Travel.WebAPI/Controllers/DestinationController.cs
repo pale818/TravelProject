@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Travel.API.Data;
+using Travel.API.Dtos;
 using Travel.API.Models;
 using Travel.API.Services;
 
@@ -40,15 +41,21 @@ namespace Travel.API.Controllers
 
         // POST: api/destination
         [HttpPost]
-        public async Task<ActionResult<Destination>> PostDestination(Destination destination)
+        public async Task<ActionResult<Destination>> PostDestination(DestinationDto destinationDto)
         {
             
-            if (_context.Destinations.Any(d => d.Name == destination.Name))
+            if ( _context.Destinations.Any(d => d.Name == destinationDto.Name))
             {
                 ModelState.AddModelError("name", "A destination with this name already exists.");
                 return ValidationProblem(ModelState);
             }
 
+
+            var destination = new Destination
+            {
+                Name = destinationDto.Name,
+                Country = destinationDto.Country
+            };
 
             _context.Destinations.Add(destination);
             await _context.SaveChangesAsync();

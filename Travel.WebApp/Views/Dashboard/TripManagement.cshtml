@@ -7,7 +7,9 @@
     <div class="overlay"></div>
     <div class="container dashboard-content">
         <div class="dashboard-card">
+            <button class="btn btn-info mb-3 me-2" onclick="openFilterModal()">Filter Destinations</button>
             <button class="btn btn-success mb-3" onclick="showAddForm()">+ Add Trip</button>
+
             <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search trips..." oninput="onSearchInput()" />
 
             <div class="table-responsive">
@@ -44,13 +46,21 @@
     </div>
 </div>
 
-<!-- Destination modal -->
 <div id="destinationModal" class="modal" style="display:none">
     <div class="modal-content">
         <h5>Manage Destinations</h5>
         <div id="destinationList"></div>
         <button class="btn btn-primary mt-2" onclick="saveDestinations()">Save</button>
         <button class="btn btn-secondary mt-2" onclick="closeDestinationModal()">Close</button>
+    </div>
+</div>
+
+<div id="filterDestinationModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h5>Filter by Destination</h5>
+        <div id="filterDestinationList"></div>
+        <button class="btn btn-primary mt-2" onclick="applyFilter()">Apply Filter</button>
+        <button class="btn btn-secondary mt-2" onclick="closeFilterModal()">Close</button>
     </div>
 </div>
 
@@ -68,21 +78,68 @@
             pageSize = 3;
         }
 
-        let allDestinations = [];
+        let allDestinations = []; // Global variable to store all destinations
+        let selectedDestinationIds = []; // NEW: Global variable to hold selected filter IDs
         let editingTripId = null;
 
+        // NEW: Opens the filter modal and populates it with all destinations.
+        // It checks the checkboxes based on the current 'selectedDestinationIds' global array.
+        async function openFilterModal() {
+            // Fetch all destinations if we haven't already
+            if (allDestinations.length === 0) {
+                const res = await fetch("https://localhost:7172/api/destination", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                allDestinations = await res.json();
+            }
+
+            const container = document.getElementById("filterDestinationList");
+            container.innerHTML = allDestinations.map(dest => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="filter-dest-${dest.id}" value="${dest.id}" ${selectedDestinationIds.includes(dest.id) ? 'checked' : ''} />
+                    <label class="form-check-label" for="filter-dest-${dest.id}">${dest.name}</label>
+                </div>`).join("");
+
+            document.getElementById("filterDestinationModal").style.display = "flex";
+        }
+
+        // NEW: Applies the selected filters and reloads the trip list.
+        function applyFilter() {
+            // Update the global array with the selected IDs from the modal
+            selectedDestinationIds = Array.from(document.querySelectorAll("#filterDestinationList input:checked"))
+                .map(input => parseInt(input.value));
+
+            // Reset to the first page and reload trips with the new filter
+            currentPage = 1;
+            loadTrips(currentPage);
+
+            closeFilterModal();
+        }
+
+        // NEW: Closes the filter modal without applying changes.
+        function closeFilterModal() {
+            document.getElementById("filterDestinationModal").style.display = "none";
+        }
+
         // Triggered when the user types in the search input field.
-        // Resets the current page to 1 and fetches filtered trip data from the server.
         function onSearchInput() {
             currentPage = 1;
             loadTrips(currentPage);
         }
 
-        // Loads trips from the API based on the current page and search query.
-        // Handles rendering of the trip list and a sliding window pagination control (e.g., 2-3-4).
+        // Loads trips from the API based on the current page, search query, and selected destinations.
         async function loadTrips(page = 1) {
             const query = document.getElementById("searchInput")?.value || "";
-            const res = await fetch(`https://localhost:7172/api/trip/search?page=${page}&pageSize=${pageSize}&query=${encodeURIComponent(query)}`, {
+
+            const url = new URL(`https://localhost:7172/api/trip/search`);
+            url.searchParams.append('page', page);
+            url.searchParams.append('pageSize', pageSize);
+            url.searchParams.append('query', query);
+
+            // Use the global array to append destination IDs to the URL
+            selectedDestinationIds.forEach(id => url.searchParams.append('destinationIds', id));
+
+            const res = await fetch(url.toString(), {
                 headers: { "Authorization": "Bearer " + token }
             });
             const result = await res.json();
@@ -95,7 +152,7 @@
                 : trips.map(t => `
                     <tr>
                         <td>${t.name}</td>
-                        <td>${t.description || ""}</td>   
+                        <td>${t.description || ""}</td>
                         <td>${t.price.toFixed(2)}</td>
                         <td><button class="btn btn-sm btn-info" onclick="openDestinationModal(${t.id})">Manage</button></td>
                         <td class="trip-actions">
@@ -104,28 +161,16 @@
                         </td>
                     </tr>`).join("");
 
+
             const paginationDiv = document.getElementById("pagination");
-            // clears any previously rendered pagination buttons before re-rendering 
-            // new ones for the current page
             paginationDiv.innerHTML = "";
 
-            // Determine the sliding window range
-            // Shows up to 3 page buttons at a time: the current page, one before, and one after.
-            // startPage is either page - 1 or 1 (if you’re on the first or second page).
-            // endPage is startPage + 2 unless there are fewer total pages remaining.
             let startPage = Math.max(1, page - 1);
             let endPage = Math.min(totalPages, startPage + 2);
-
-            // Adjust startPage if we're at the end
-            // This ensures that there are always 3 buttons (if possible). 
-            // So if endPage is 2, startPage will be 1.
             if (endPage - startPage < 2) {
                 startPage = Math.max(1, endPage - 2);
             }
 
-            // "Previous" button
-            // Renders a "<" button only if you're not on the first page.
-            // On click, it loads the previous page (page - 1).
             if (page > 1) {
                 const prevBtn = document.createElement("button");
                 prevBtn.textContent = "<";
@@ -134,12 +179,6 @@
                 paginationDiv.appendChild(prevBtn);
             }
 
-            // Page number buttons
-            // Dynamically creates a button for each page from startPage to endPage.
-            // Adds Bootstrap styling:
-            // Current page gets btn-primary
-            // Others get btn-light
-            // Clicking a number loads that page via loadTrips(i).
             for (let i = startPage; i <= endPage; i++) {
                 const btn = document.createElement("button");
                 btn.textContent = i;
@@ -148,9 +187,6 @@
                 paginationDiv.appendChild(btn);
             }
 
-            // "Next" button
-            // Renders a ">" button only if you're not on the last page.
-            // On click, it loads the next page (page + 1).
             if (page < totalPages) {
                 const nextBtn = document.createElement("button");
                 nextBtn.textContent = ">";
@@ -158,7 +194,6 @@
                 nextBtn.addEventListener("click", () => loadTrips(page + 1));
                 paginationDiv.appendChild(nextBtn);
             }
-
         }
 
         // Displays the trip form in "Add" mode by clearing all input fields.
@@ -212,7 +247,7 @@
 
 
                 if (!response.ok) {
-                    const errorText = await response.text(); 
+                    const errorText = await response.text(); 
                     alert("Failed to create trip");
                     return;
                 }
@@ -296,7 +331,9 @@
             editingTripId = null;
         }
 
-        // On page load, fetch and display the first page of trips.
-        document.addEventListener("DOMContentLoaded", () => loadTrips(currentPage));
+        // On page load, fetch destinations for the filter and then display the first page of trips.
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTrips(currentPage);
+        });
     </script>
 }

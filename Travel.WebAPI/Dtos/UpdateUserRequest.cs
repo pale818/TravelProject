@@ -16,5 +16,11 @@ namespace Travel.API.Dtos
 
         [Phone(ErrorMessage = "Phone number must be valid.")]
         public string? PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "Password hash is required")]
+        [MinLength(3, ErrorMessage = "Password must be at least 3 characters")]
+        public string Password { get; set; } = string.Empty;
+
+        public bool IsAdmin { get; set; } = false;
     }
 }

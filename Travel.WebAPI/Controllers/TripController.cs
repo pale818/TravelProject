@@ -12,6 +12,9 @@ using Travel.API.Models;
 using Travel.API.Dtos;
 using Travel.API.Services;
 using System;
+using System.Collections.Generic;
+using Travel.WebAPI.Dtos;
+
 
 namespace Travel.API.Controllers
 {
@@ -108,15 +111,21 @@ namespace Travel.API.Controllers
         // **********************************************************
         // POST: api/trip
         [HttpPost]
-        public async Task<ActionResult<Trip>> CreateTrip(Trip trip)
+        public async Task<ActionResult<Trip>> CreateTrip(TripCreateDto tripDto)
         {
-            System.Diagnostics.Debug.WriteLine($"TRIP:: {trip.Name}");
+            System.Diagnostics.Debug.WriteLine($"TRIP:: {tripDto.Name}");
 
-            if (_context.Trips.Any(t => t.Name == trip.Name))
+            if (_context.Trips.Any(t => t.Name == tripDto.Name))
             {
                 ModelState.AddModelError("name", "A Trip with this name already exists.");
                 return ValidationProblem(ModelState);
             }
+            var trip = new Trip
+            {
+                Name = tripDto.Name,
+                Description = tripDto.Description,
+                Price = tripDto.Price
+            };
 
             _context.Trips.Add(trip);
             await _context.SaveChangesAsync();
@@ -256,7 +265,7 @@ namespace Travel.API.Controllers
 
 
         // FOR PAGINATION
-        [HttpGet("search")]
+        /*[HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Trip>>> SearchTrips(
             [FromQuery] string? query = null,
             [FromQuery] int page = 1,
@@ -278,6 +287,50 @@ namespace Travel.API.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
+
+            var response = new
+            {
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                Data = trips,
+            };
+
+            return Ok(response);
+        }*/
+
+        // FOR PAGINATION and FILTERING
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Trip>>> SearchTrips(
+            [FromQuery] string? query = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] List<int>? destinationIds = null)
+        {
+            if (page < 1 || pageSize < 1) return BadRequest("Invalid paging parameters.");
+
+            // Start with a query that includes the Destinations navigation property
+            var tripQuery = _context.Trips.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                tripQuery = tripQuery.Where(t => t.Name.Contains(query) || (t.Description != null && t.Description.Contains(query)));
+            }
+
+            // NEW: Filter by selected destinations
+            if (destinationIds != null && destinationIds.Any())
+            {
+                // This will generate a JOIN and a WHERE clause in the SQL query
+                // It checks if the trip has at least one destination whose ID is in the provided list.
+                tripQuery = tripQuery.Where(t => t.Destinations.Any(d => destinationIds.Contains(d.Id)));
+            }
+
+            var totalCount = await tripQuery.CountAsync();
+            var trips = await tripQuery
+                .OrderBy(t => t.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             var response = new
             {
